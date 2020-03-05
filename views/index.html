@@ -1,0 +1,49 @@
+<!-- This is a static file -->
+<!-- served from your routes in server.js -->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Spotify Flask Sample</title>
+  </head>
+  <body>
+    <header>
+      <h1>
+        Friendship Playlist
+      </h1>
+      <h4>
+        a playlist for friends
+      </h4>
+    </header>
+
+    <main>
+      <p>Choose a country</p>
+      <form>
+        <div class="input-group col-md-6">
+          <select class="form-control">
+            <option value="SE">Sweden</option>
+            <option value="US">United States</option>
+            <option value="CA">Canada</option>
+            <option value="GB">United Kingdom</option>
+            <option value="FR">France</option>
+            <option value="DE">Germany</option>
+            <option value="JP">Japan</option>
+            <option value="FI">Finland</option>
+            <option value="IS">Iceland</option>
+          </select>
+        </div>
+      </form>
+      <section class="dreams">
+        <ul id="new-releases" class="sp-container">
+        </ul>
+      </section>
+    </main>
+
+<!--      Your web-app is https, so your scripts need to be too -->
+<!--     <script src="https://code.jquery.com/jquery-2.2.1.min.js"
+            integrity="sha256-gvQgAFzTH6trSrAWoH1iPo9Xc96QxSZ3feW6kem+O00="
+            crossorigin="anonymous"></script>
+    <script src="/public/client.js"></script>
+
+  </body>
+</html>

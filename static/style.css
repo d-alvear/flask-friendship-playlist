@@ -1,0 +1,52 @@
+/* styles */
+/* called by your view template */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Circular, Helvetica arial, sans-serif;
+  margin: 70px;
+}
+
+#new-releases {
+  max-width: 1800px;
+  padding: 40px 0;
+}
+
+.sp-container {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.sp-entity-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin: 15px 5px;
+  width: 250px;
+}
+
+.sp-cover {
+  height: 200px;
+  width: 200px;
+  cursor: pointer;
+  background-size: contain !important;
+}
+
+.sp-cover:hover {
+  box-shadow: inset 0 0 0 1000px rgba(255, 255, 255, 0.4);
+}
+
+.sp-title {
+  margin: 15px 0 0;
+}
+
+.sp-by {
+  margin: 0;
+}
