@@ -1,13 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import sys
 from os import environ
 from flask import Flask, request, render_template, redirect
-from secret import sql_password
-import friendship_app as fp
+from project_utils import *
+import pandas as pd
+import numpy as np
 import psycopg2 as pg
-import project_utils as pu
-import spotipy
+from psycopg2 import Error
 from spotipy.oauth2 import SpotifyClientCredentials
+from sklearn.cluster import KMeans
+import librosa
+import spotipy
+import spotipy.util as util
+import requests
+import pickle
 
 # connect to spotify_db
 conn = pg.connect(database="spotify_db",
@@ -16,19 +23,24 @@ conn = pg.connect(database="spotify_db",
 
 
 # Authenticate with Spotify using the Client Credentials flow
-client_credentials_manager = SpotifyClientCredentials(client_id=environ.get('SPOTIPY_CLIENT_ID'),client_secret=environ.get('SPOTIPY_CLIENT_SECRET'))
-sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+scope = 'playlist-modify-public'
+if len(sys.argv) > 1:
+    username = sys.argv[1]
+else:
+	print("Sorry")
 
 
 app = Flask(__name__, static_folder='static', template_folder='views')
+
 @app.route('/')
 def authenticate_user():
-	token = client_credentials_manager.get_access_token()
-	if token:
-		# sp = spotipy.Spotify(auth=token)
-		return redirect("/index")
-	else:
-		return "No token"
+	token = util.prompt_for_user_token(username, 
+									scope, 
+									client_id=environ.get('SPOTIPY_CLIENT_ID'), 
+									client_secret=environ.get('SPOTIPY_CLIENT_SECRET'), redirect_uri=
+									'http://127.0.0.1')
+	sp = spotipy.Spotify(auth=token)
+	return redirect('/index')
 
 @app.route('/index')
 def homepage():
@@ -37,13 +49,18 @@ def homepage():
 @app.route('/index', methods=['POST'])
 def friendship_app():
 	seed = request.form['seed']
-	check = fp.check_database(str(seed))
+	check = check_database(str(seed))
+	
 	if check==True:
-		res = fp.in_database(str(seed))
-		return render_template('index.html',  tables=[res.to_html(classes='data', header="true")])
+		recs = in_database(str(seed))
+		user_all_data = sp.current_user()
+		return user_all_data
+		# playlist = create_playlist(sp,recs)
+		# return render_template('playlist.html', playlist=playlist)
 	elif check==False:
-		res = fp.not_in_database(str(seed))
-		return render_template('index.html',  tables=[res.to_html(classes='data', header="true")])
+		recs = not_in_database(str(seed))
+		playlist = create_playlist(sp,recs)
+		return render_template('playlist.html', playlist=playlist)
 
 if __name__ == '__main__':
 	app.run()

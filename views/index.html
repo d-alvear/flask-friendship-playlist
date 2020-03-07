@@ -27,15 +27,12 @@
       <form method="POST" action='index' >
         <input name = "seed" required type="text" maxlength="100" placeholder="Search">
           <span class="input-group-btn">
-            <button class="btn btn-powder-green" type="submit">Submit</button>
+            <button class="btn btn-powder-green" onclick="window.location.href='{{playlist}}'" type="submit">Submit</button>
         </div>
       </form>
       <section class="results">
         <h3>Result</h3>
-        <!-- <ul id="results" class="sp-container"></ul> -->
-        {% for table in tables %}
-            {{ table|safe }}
-        {% endfor %}
+        
       </section>
     </main>
 

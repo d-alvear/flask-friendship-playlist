@@ -1,6 +1,6 @@
 import sys
 from os import environ
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.cluster import KMeans
 from secret import sql_password, spotify_credentials
 import pandas as pd
 import numpy as np
@@ -45,8 +45,8 @@ def in_database(seed):
         distances[track_id] = dist
     #sorts the resulting dict for the top 3 most similar songs
     top_three = sorted(distances, key=distances.get,reverse=True)[1:4] #start at 1 because seed is in the results 
-
-    #step four: query the db for the track name and artist of the most similar tracks
+    
+    # step four: query the db for the track name and artist of the most similar tracks
     q = f'''
     SELECT track_id, track_name, artist
     FROM tracks
@@ -57,20 +57,11 @@ def in_database(seed):
     #returns a df with the track name, artist, and distance value for recommended tracks
     for i,row in recs_df['track_id'].iteritems():
         recs_df.loc[i,'distance'] = distances[row]
+    result = recs_df[['track_name','artist','distance']].sort_values('distance',ascending=False)
     
-    return recs_df[['track_name','artist','distance']].sort_values('distance',ascending=False)
+    return result.to_html()
 
 def not_in_database(seed):
-    # #authorization flow for Spotipy API
-    # credentials = oauth2.SpotifyClientCredentials(
-    #     client_id=spotify_credentials['client_id'],
-    #     client_secret=spotify_credentials['client_secret'])
-
-    # token = credentials.get_access_token()
-    # if token:
-    #     sp = spotipy.Spotify(auth=token)
-    # else:
-    #     print("No token")
 
     #search for a track and extract metadata from results
     result = pu.search_and_extract(seed) #using the input track name as the query to search spotify
@@ -155,8 +146,7 @@ def not_in_database(seed):
         distances[track_id] = dist
     #sorts the resulting dict for the top 3 most similar songs
     top_three = sorted(distances, key=distances.get,reverse=True)[1:4] #start at 1 because seed is in the results 
-
-    #step four: query the db for the track name and artist of the most similar tracks
+    # #step four: query the db for the track name and artist of the most similar tracks
     q = f'''
     SELECT track_id, track_name, artist
     FROM tracks
@@ -168,7 +158,8 @@ def not_in_database(seed):
     for i,row in recs_df['track_id'].iteritems():
         recs_df.loc[i,'distance'] = distances[row]
     
-    return recs_df[['track_name','artist','distance']].sort_values('distance',ascending=False)
+    result = recs_df[['track_name','artist','distance']].sort_values('distance',ascending=False)
+    return result.to_html()
 
 def check_database(seed):
     seed = str(seed)
