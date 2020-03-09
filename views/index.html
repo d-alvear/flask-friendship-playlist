@@ -24,7 +24,7 @@
     </header>
     <main>
       <p>Input a song</p>
-      <form method="POST" action='index' >
+      <form method="POST" action='search' >
         <input name = "seed" required type="text" maxlength="100" placeholder="Search">
           <span class="input-group-btn">
             <button class="btn btn-powder-green" onclick="window.location.href='{{playlist}}'" type="submit">Submit</button>
@@ -32,7 +32,15 @@
       </form>
       <section class="results">
         <h3>Result</h3>
-        
+        <table>
+          {% for row in table %}
+          <tr>
+              {% for value in row %}
+              <td>{{ value }}</td>
+              {% endfor %}
+          </tr>
+          {% endfor %}
+      </table>
       </section>
     </main>
 

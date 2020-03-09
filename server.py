@@ -18,49 +18,44 @@ import pickle
 
 # connect to spotify_db
 conn = pg.connect(database="spotify_db",
-                  user="postgres", 
-                  password=sql_password)
+				  user="postgres", 
+				  password=sql_password)
 
 
 # Authenticate with Spotify using the Client Credentials flow
-scope = 'playlist-modify-public'
-if len(sys.argv) > 1:
-    username = sys.argv[1]
-else:
-	print("Sorry")
+client_credentials_manager = SpotifyClientCredentials(client_id=environ.get('SPOTIPY_CLIENT_ID'),client_secret=environ.get('SPOTIPY_CLIENT_SECRET'))
+sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 
 app = Flask(__name__, static_folder='static', template_folder='views')
 
 @app.route('/')
 def authenticate_user():
-	token = util.prompt_for_user_token(username, 
-									scope, 
-									client_id=environ.get('SPOTIPY_CLIENT_ID'), 
-									client_secret=environ.get('SPOTIPY_CLIENT_SECRET'), redirect_uri=
-									'http://127.0.0.1')
-	sp = spotipy.Spotify(auth=token)
-	return redirect('/index')
+	token = client_credentials_manager.get_access_token()
+	if token:
+		sp = spotipy.Spotify(auth=token)
+		return redirect("/index")
+	else:
+		return "No token"
 
 @app.route('/index')
 def homepage():
 	return render_template('index.html')
 
-@app.route('/index', methods=['POST'])
+@app.route('/search', methods=['POST','GET'])
 def friendship_app():
 	seed = request.form['seed']
-	check = check_database(str(seed))
+
+	if check_database(str(seed)) == True:
+		rec_in_db = in_database(seed)
+		return rec_in_db.to_html()
+		# return render_template('index.html', tables=[rec_in_db.to_html()])
 	
-	if check==True:
-		recs = in_database(str(seed))
-		user_all_data = sp.current_user()
-		return user_all_data
-		# playlist = create_playlist(sp,recs)
-		# return render_template('playlist.html', playlist=playlist)
-	elif check==False:
-		recs = not_in_database(str(seed))
-		playlist = create_playlist(sp,recs)
-		return render_template('playlist.html', playlist=playlist)
+	elif check_database(str(seed)) == False:
+		rec_not_in_db = not_in_database(seed)
+		return rec_not_in_db.to_html()
+		# return render_template('index.html', tables=[rec_not_in_db.to_html()])
+		
 
 if __name__ == '__main__':
 	app.run()

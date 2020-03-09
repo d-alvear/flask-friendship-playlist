@@ -188,7 +188,20 @@ def in_database(seed):
 		
 	#sorts the resulting dict for the top 3 most similar songs
 	top_three = sorted(distances, key=distances.get,reverse=True)[1:4]
-	return top_three
+
+	q = f'''
+	SELECT track_id, track_name, artist
+	FROM tracks
+	WHERE track_id IN {tuple(top_three)};'''
+
+	recs_df = run_query(q)
+
+	#returns a df with the track name, artist, and distance value for recommended tracks
+	for i,row in recs_df['track_id'].iteritems():
+		recs_df.loc[i,'distance'] = distances[row]
+	
+	return recs_df[['track_name','artist','distance']].sort_values('distance',ascending=False)
+
 
 def not_in_database(seed):
 	#search for a track and extract metadata from results
@@ -257,7 +270,20 @@ def not_in_database(seed):
 		
 	# #sorts the resulting dict for the top 3 most similar songs
 	top_three = sorted(distances, key=distances.get,reverse=True)[1:4]
-	return top_three
+
+	q = f'''
+	SELECT track_id, track_name, artist
+	FROM tracks
+	WHERE track_id IN {tuple(top_three)};'''
+
+	recs_df = run_query(q)
+
+	#returns a df with the track name, artist, and distance value for recommended tracks
+	for i,row in recs_df['track_id'].iteritems():
+		recs_df.loc[i,'distance'] = distances[row]
+	
+	return recs_df[['track_name','artist','distance']].sort_values('distance',ascending=False)
+
 
 def check_database(seed):
     seed = str(seed)
