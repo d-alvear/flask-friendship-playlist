@@ -44,18 +44,23 @@ def homepage():
 
 @app.route('/search', methods=['POST','GET'])
 def friendship_app():
-	seed = request.form['seed']
+	query = request.form['query']
+	#load clustering model
+	km = pickle.load(open('kmeans_model.pkl','rb'))
 
-	if check_database(str(seed)) == True:
-		rec_in_db = in_database(seed)
-		return rec_in_db.to_html()
-		# return render_template('index.html', tables=[rec_in_db.to_html()])
-	
-	elif check_database(str(seed)) == False:
-		rec_not_in_db = not_in_database(seed)
-		return rec_not_in_db.to_html()
-		# return render_template('index.html', tables=[rec_not_in_db.to_html()])
-		
+	in_db, not_in_db = sort_inputs(query)
+
+	in_db_df = in_database(in_db)
+	not_in_db_df = not_in_database(not_in_db)
+	not_in_db_df = scale_features(not_in_db_df)
+    
+	input_df = combine_frames(in_db, not_in_db, in_db_df, not_in_db_df)
+
+	cluster_df, new_fv = get_cluster_df(input_df, km)
+
+	results = get_results(cluster_df, new_fv, input_df)
+	return results.to_html()
+
 
 if __name__ == '__main__':
 	app.run()
