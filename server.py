@@ -55,8 +55,6 @@ def friendship_app():
 		rec_not_in_db = not_in_database(seed)
 		return rec_not_in_db.to_html()
 		# return render_template('index.html', tables=[rec_not_in_db.to_html()])
-		
-
 if __name__ == '__main__':
 	app.run()
 	
