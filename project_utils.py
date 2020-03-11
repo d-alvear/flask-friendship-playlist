@@ -200,12 +200,26 @@ def create_playlist(sp, recommended_tracks):
 
     return playlist_uri
 
+def parse_query(query):
+    query = query[:-1] if query.endswith(';') else query
+    query = query.split(";")
+
+    for track in query:
+        track = track.split(",")
+        try:
+            name = track[0].strip()
+            artist = track[1].strip()
+        except IndexError:
+            return False
+
+
 def sort_inputs(query):
     not_in_db = []
     in_db = []
     query = query.replace("'","_")
-    
+    query = query[:-1] if query.endswith(';') else query
     query = query.split(";")
+    
 
     for track in query:
         track = track.split(",")
@@ -243,8 +257,7 @@ def in_database(in_db):
 
     return in_db_df
 #================================ NOT IN DATABASE =============================#
-def not_in_database(not_in_db):# create an empty dataframe 
-
+def not_in_database(not_in_db):
     #search for a track and extract metadata from results
     metadata = {}
     for track in not_in_db:
@@ -252,11 +265,13 @@ def not_in_database(not_in_db):# create an empty dataframe
         metadata[track_id] = [preview_url,track_name,artist]
 
     not_in_db_df = pd.DataFrame()
+    no_url = {}
     for track_id in metadata.keys():
-        spotify_features = extract_features(track_id)
-
         if metadata[track_id][0] == None:
+            no_url[track_id] = [metadata[track_id][1],metadata[track_id][2]]
             continue
+        
+        spotify_features = extract_features(track_id)
         get_mp3(metadata[track_id][0],track_id)
 
         #use librosa to extract audio features
@@ -276,7 +291,7 @@ def not_in_database(not_in_db):# create an empty dataframe
         not_in_db_df = not_in_db_df.append(all_features)
     
     not_in_db_df = not_in_db_df.reset_index(drop=True)
-    return not_in_db_df
+    return not_in_db_df, no_url
 
 def scale_features(not_in_db_df):
     # min-max scaling
@@ -302,6 +317,9 @@ def scale_features(not_in_db_df):
 
 #============================= combining step ============================#
 def combine_frames(in_db, not_in_db, in_db_df, not_in_db_df):
+    if len(in_db_df) == 0 and len(not_in_db_df) == 0:
+        input_df = pd.DataFrame()
+    
     if len(in_db) > 0 and len(not_in_db) > 0:
         input_df = in_db_df.iloc[:,:-1]
         input_df = input_df.append(not_in_db_df)
@@ -310,10 +328,11 @@ def combine_frames(in_db, not_in_db, in_db_df, not_in_db_df):
         input_df = not_in_db_df
 
     elif len(in_db_df) > 0 and len(not_in_db_df) == 0:
-        input_df = in_db_df[:,:-1]
+        input_df = in_db_df.iloc[:,:-1]
 
     input_df = input_df.reset_index(drop=True)
     return input_df
+
 #============================== final steps ==============================#
 def get_cluster_df(input_df, km):
     #get the mean
@@ -331,7 +350,7 @@ def get_cluster_df(input_df, km):
     cluster_df = run_query(q)
     return cluster_df, new_fv
 
-def get_results(cluster_df, new_fv, input_df):
+def get_results(cluster_df, new_fv, input_df, no_url):
 
     distances = {}
     for i,row in cluster_df.iterrows():
@@ -369,5 +388,12 @@ def get_results(cluster_df, new_fv, input_df):
     #returns a df with the track name, artist, and distance value for recommended tracks
     for i,row in res['track_id'].iteritems():
         res.loc[i,'distance'] = distances[row]
-
-    return res[['track_name','artist','distance']].sort_values('distance',ascending=False)
+    
+    res_df = res[['track_name','artist','distance']].sort_values('distance',ascending=False)
+    # if len(no_url) > 0:
+    #     print("")
+    #     for k,v in no_url.items():
+    #         print(f"Could not analyze: {v[0]}, by {v[1]}")
+    return res_df, no_url
+    
+    
