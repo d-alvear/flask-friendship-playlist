@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import sys
 from os import environ
-from flask import Flask, request, render_template, redirect
+from flask import Flask, request, render_template, redirect, Response
 from project_utils import *
 import pandas as pd
 import numpy as np
@@ -47,20 +47,27 @@ def friendship_app():
 	query = request.form['query']
 	#load clustering model
 	km = pickle.load(open('kmeans_model.pkl','rb'))
-
+	
+	if parse_query(query) == False:
+		return "Your query doesn't look quite right, make sure it looks like the example. It should include the name of the song, and the artist, separated by a comma."
+	else:
+		pass
+	
 	in_db, not_in_db = sort_inputs(query)
 
 	in_db_df = in_database(in_db)
-	not_in_db_df = not_in_database(not_in_db)
-	not_in_db_df = scale_features(not_in_db_df)
-    
-	input_df = combine_frames(in_db, not_in_db, in_db_df, not_in_db_df)
+	not_in_db_df, no_url = not_in_database(not_in_db)
 
+	not_in_db_df = scale_features(not_in_db_df)
+		
+	input_df = combine_frames(in_db, not_in_db, in_db_df, not_in_db_df)
+	if input_df.empty:
+		return "Sorry, the songs you chose cannot be analyzed. Please pick different songs."
 	cluster_df, new_fv = get_cluster_df(input_df, km)
 
-	results = get_results(cluster_df, new_fv, input_df)
-	return results.to_html()
-
+	res_df, no_url = get_results(cluster_df, new_fv, input_df, no_url)
+	
+	return res_df.to_html()
 
 if __name__ == '__main__':
 	app.run()

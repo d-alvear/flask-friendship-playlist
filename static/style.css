@@ -29,7 +29,7 @@ body {
   align-items: center;
   text-align: center;
   margin: 15px 5px;
-  width: 250px;
+  width: 1000px;
 }
 
 .sp-cover {
@@ -59,4 +59,9 @@ table.dataframe, .dataframe th, .dataframe td {
   padding: 10px;
   margin-bottom: 40px;
   font-size: 0.9em;
+}
+
+.thick-border {
+  border: 3px solid black;
+  border-collapse: collapse;
 }

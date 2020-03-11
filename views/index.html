@@ -23,24 +23,17 @@
       </h4>
     </header>
     <main>
-      <p>Input songs</p>
+      <p>Input songs using the following format, using semicolons between songs:<br>
+      <i>Bohemian Rhapsody, Queen; Heartbreak Hotel, Elvis; Toxic, Britney Spears</i></p>
       <form method="POST" action='search' >
-        <input name = "query" required type="text" maxlength="500" placeholder="Ex: Tiny Dancer, Elton John; Bohemian Rhapsody, Queen">
+        <input name = "query" required type="text" maxlength="8000" placeholder="Search">
           <span class="input-group-btn">
             <button class="btn btn-powder-green" onclick="window.location.href='{{playlist}}'" type="submit">Submit</button>
         </div>
       </form>
       <section class="results">
         <h3>Result</h3>
-        <table>
-          {% for row in table %}
-          <tr>
-              {% for value in row %}
-              <td>{{ value }}</td>
-              {% endfor %}
-          </tr>
-          {% endfor %}
-      </table>
+
       </section>
     </main>
 
