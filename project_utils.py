@@ -60,8 +60,16 @@ def search_and_extract(track_query):
     preview_url = search['tracks']['items'][0]['preview_url']
     track_name = search['tracks']['items'][0]['name']
     artist = search['tracks']['items'][0]['artists'][0]['name']
+    artist_id = search['tracks']['items'][0]['artists'][0]['id']
+
+    return track_id, preview_url, track_name, artist, artist_id
+
+def get_artist_genre(artist_id):
+    '''A function that takes in a Spotify artist id, calls the Spotify 
+    API, and returns the artist genres, as a list'''
+    search = sp.artist(artist_id)
+    return search['genres']
     
-    return track_id, preview_url, track_name, artist
 
 def extract_features(track_id):
     '''A function that takes in a spotify track id, requests the audio
@@ -116,9 +124,6 @@ def librosa_pipeline(track_id):
     y, sr = librosa.load(track, mono=True, duration=30)
 
     #feature extraction
-    rmse = librosa.feature.rmse(y=y)
-    d['rmse'] = np.mean(rmse)
-
     spec_cent = librosa.feature.spectral_centroid(y=y, sr=sr)
     d['spectral_centroid'] = np.mean(spec_cent)
 
@@ -130,9 +135,6 @@ def librosa_pipeline(track_id):
 
     zcr = librosa.feature.zero_crossing_rate(y)
     d['zero_crossing_rate'] = np.mean(zcr)
-
-    tempo = librosa.beat.tempo(y=y, sr=sr)
-    d['tempo_bpm'] = tempo[0]
 
     mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=20)
     for i,e in zip(range(1, 21),mfcc):
@@ -186,21 +188,22 @@ def check_database(query):
     else:
         return False
 
-def create_playlist(sp, recommended_tracks):
-    user_all_data = sp.current_user()
-    user_id = user_all_data["id"]
+# # for creating a spotify playlist from track_uris
+# def create_playlist(sp, recommended_tracks):
+#     user_all_data = sp.current_user()
+#     user_id = user_all_data["id"]
 
-    playlist_all_data = sp.user_playlist_create(user_id, "Friendship Playlist")
-    playlist_id = playlist_all_data["id"]
-    playlist_uri = playlist_all_data["uri"]
-    # try:
-    sp.user_playlist_add_tracks(user_id, playlist_id, recommended_tracks)
-    # except spotipy.client.SpotifyException as s:
-    # 	print("could not add tracks")
+#     playlist_all_data = sp.user_playlist_create(user_id, "Friendship Playlist")
+#     playlist_id = playlist_all_data["id"]
+#     playlist_uri = playlist_all_data["uri"]
+#     # try:
+#     sp.user_playlist_add_tracks(user_id, playlist_id, recommended_tracks)
+#     # except spotipy.client.SpotifyException as s:
+#     # 	print("could not add tracks")
 
-    return playlist_uri
+#     return playlist_uri
 
-def parse_query(query):
+def check_query_format(query):
     query = query[:-1] if query.endswith(';') else query
     query = query.split(";")
 
@@ -261,8 +264,11 @@ def not_in_database(not_in_db):
     #search for a track and extract metadata from results
     metadata = {}
     for track in not_in_db:
-        track_id, preview_url, track_name, artist = search_and_extract(track) #using the input track name as the query to search spotify
-        metadata[track_id] = [preview_url,track_name,artist]
+        track_id, preview_url, track_name, artist, artist_id = search_and_extract(track) #using the input track name as the query to search spotify
+        genres = get_artist_genre(artist_id)
+        metadata[track_id] = [preview_url,track_name,artist,artist_id,genres]
+
+        
 
     not_in_db_df = pd.DataFrame()
     no_url = {}
@@ -282,7 +288,7 @@ def not_in_database(not_in_db):
 
         #concatenating the two dfs so the feature vector will be in the same format as the db
         all_features = pd.concat([librosa_features,spotify_features],axis=1)
-        all_features.drop(['rmse','tempo_bpm','id','duration_ms','time_signature','mode','key'],axis=1, inplace=True)
+        all_features.drop(['id','duration_ms','time_signature','mode','key'],axis=1, inplace=True)
 
         #insert metadata into dataframe
         all_features.insert(1,'track_name',metadata[track_id][1])
@@ -371,9 +377,9 @@ def get_results(cluster_df, new_fv, input_df, no_url):
             LIMIT 3;'''
         res = run_query(q)
 
-    elif len(input_df) == 0:
-        print("Sorry could not get recommendations for any track you supplied. Please try different tracks.")
-        sys.exit()
+    # elif len(input_df) == 0:
+    #     print("Sorry could not get recommendations for any track you supplied. Please try different tracks.")
+    #     sys.exit()
     
     elif len(input_df) > 1:
         input_ids = tuple(input_df['track_id'])
@@ -397,4 +403,28 @@ def get_results(cluster_df, new_fv, input_df, no_url):
     #         print(f"Could not analyze: {v[0]}, by {v[1]}")
     return res_df, no_url
     
+def make_combined_recommendations(user_track_dict):
+    # user_track_dict = {"user_1": g1_arr.values,
+        #               "user_2": g2_arr.values,
+        #               "user_1_ids": g1_arr.index,
+        #               "user_2_ids": g2_arr.index}
+    # from sklearn.metrics.pairwise import cosine_similarity
+    similarity_matrix = cosine_similarity(users['user 1'],users['user 2'])
+    similarity_df = pd.DataFrame(similarity_matrix,
+                                 columns=user_track_dict['user_1_ids'],
+                                 index=user_track_dict['user_2_ids'])
+    scores = {}
+    for i,row in cosine_df.iterrows():
+        scores[max(row)] = [i,row.idxmax()]
+
+    top_three = sorted(scores,reverse=True)[:3]
+
+    ids = ([scores[i][0] for i in top_three] + [scores[i][1] for i in top_three])
+    ids = set(ids)
     
+    q = f'''
+    SELECT track_id, track_name, artist FROM tracks
+    WHERE track_id IN {tuple(ids)};'''
+    recs = run_query(q)
+
+    return recs
