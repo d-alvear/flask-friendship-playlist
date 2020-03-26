@@ -282,7 +282,7 @@ def not_in_database(not_in_db):
 
         #concatenating the two dfs so the feature vector will be in the same format as the db
         all_features = pd.concat([librosa_features,spotify_features],axis=1)
-        all_features.drop(['rmse','tempo_bpm','id','duration_ms','time_signature','mode','key','mfcc20'],axis=1, inplace=True)
+        all_features.drop(['rmse','tempo_bpm','id','duration_ms','time_signature','mode','key'],axis=1, inplace=True)
 
         #insert metadata into dataframe
         all_features.insert(1,'track_name',metadata[track_id][1])
@@ -390,6 +390,7 @@ def get_results(cluster_df, new_fv, input_df, no_url):
         res.loc[i,'distance'] = distances[row]
     
     res_df = res[['track_name','artist','distance']].sort_values('distance',ascending=False)
+    res_df = res_df.reset_index(drop=True)
     # if len(no_url) > 0:
     #     print("")
     #     for k,v in no_url.items():
