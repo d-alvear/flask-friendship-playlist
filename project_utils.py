@@ -164,7 +164,7 @@ def sort_inputs(query):
         '''
         r = run_query(q)
         
-        # name = name.replace("_","'")
+        name = name.replace("_","'")
         
         if len(r) > 0:
             in_db.append(name + "," + artist)
