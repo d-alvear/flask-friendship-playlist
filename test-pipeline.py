@@ -26,8 +26,10 @@ client_credentials_manager = SpotifyClientCredentials(client_id=spotify_credenti
                                                       client_secret=spotify_credentials['client_secret'])
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
-query_a = "the barrel, aldous harding; white freckles, ariel pink; a good night, john legend"
-query_b = "ann's jam, chastity belt; comeback kid, sleigh bells; mami, piso 21"
+# query_a = "the barrel, aldous harding; white freckles, ariel pink; a good night, john legend"
+# query_b = "ann's jam, chastity belt; comeback kid, sleigh bells; mami, piso 21"
+query_a = "BFF, Kesha; teenagers, my chemical romance; you're so vain, carly simon"
+query_b = "ball and chain, janis joplin; fire and rain, james taylor; in my feelings, drake"
 
 def friendship_app(query_a,query_b):
 	##~~~~ NEED TO CREATE SECOND INPUT FORM FOR USER B ~~~~##
