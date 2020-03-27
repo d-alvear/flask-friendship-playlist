@@ -6,17 +6,16 @@ import numpy as np
 import psycopg2 as pg
 from psycopg2 import Error
 from spotipy.oauth2 import SpotifyClientCredentials
-from sklearn.cluster import KMeans
 import librosa
 import spotipy
 import requests
-import pickle
+from sklearn.metrics.pairwise import cosine_similarity
 
 client_credentials_manager = SpotifyClientCredentials(client_id=spotify_credentials['client_id'],
                                                       client_secret=spotify_credentials['client_secret'])
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
-##--------------SQL Utils--------------------------#
+#=============================== SQL Utils ====================================#
 conn = pg.connect(database="spotify_db",
                   user="postgres", 
                   password=sql_password)
@@ -33,20 +32,7 @@ def run_query(q):
         except (Exception, pg.DatabaseError) as error:
             print(error)
 
-def run_command(c):
-    '''a function that takes a SQL command as an argument
-    and executes it using the psycopg2 module'''
-    with conn:
-        try:
-            cur = conn.cursor()
-            cur.execute(c)
-            cur.close()
-            conn.commit()
-
-        except (Exception, pg.DatabaseError) as error:
-            print(error)
-
-##-----------------Spotify Utils-------------------------##
+#============================= Spotify Utils ==================================#
 def search_and_extract(track_query):
     '''A function that takes in a song query and returns
     the track id and preview url for that track in a dict.'''
@@ -60,9 +46,16 @@ def search_and_extract(track_query):
     preview_url = search['tracks']['items'][0]['preview_url']
     track_name = search['tracks']['items'][0]['name']
     artist = search['tracks']['items'][0]['artists'][0]['name']
-    
-    return track_id, preview_url, track_name, artist
+    artist_id = search['tracks']['items'][0]['artists'][0]['id']
 
+    return track_id, preview_url, track_name, artist, artist_id
+
+def get_artist_genre(artist_id):
+    '''A function that takes in a Spotify artist id, calls the Spotify 
+    API, and returns the artist genres, as a list'''
+    search = sp.artist(artist_id)
+    return search['genres']
+    
 def extract_features(track_id):
     '''A function that takes in a spotify track id, requests the audio
     features using the 'audio_features' endpoint from the Spotify API,
@@ -77,7 +70,7 @@ def extract_features(track_id):
 
     return spotify_features
 
-##---------------Librosa Utils--------------------------##
+#============================= Librosa Utils ==================================#
 def check_for_track_preview(url):
     '''Given a url object, checks if the track has a
         preview'''
@@ -116,9 +109,6 @@ def librosa_pipeline(track_id):
     y, sr = librosa.load(track, mono=True, duration=30)
 
     #feature extraction
-    rmse = librosa.feature.rmse(y=y)
-    d['rmse'] = np.mean(rmse)
-
     spec_cent = librosa.feature.spectral_centroid(y=y, sr=sr)
     d['spectral_centroid'] = np.mean(spec_cent)
 
@@ -131,9 +121,6 @@ def librosa_pipeline(track_id):
     zcr = librosa.feature.zero_crossing_rate(y)
     d['zero_crossing_rate'] = np.mean(zcr)
 
-    tempo = librosa.beat.tempo(y=y, sr=sr)
-    d['tempo_bpm'] = tempo[0]
-
     mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=20)
     for i,e in zip(range(1, 21),mfcc):
             d[f'mfcc{i}'] = np.mean(e)
@@ -145,62 +132,8 @@ def librosa_pipeline(track_id):
 
     return d    
 
-##---------------General Utils--------------------------##
-def cos_sim(a,b):
-    '''Calculates the cosine similarity between two feature
-        vectors'''
-    d = np.dot(a, b)
-    l = (np.linalg.norm(a))*(np.linalg.norm(b))
-    return d/l
-
-def get_features_and_cluster(query):
-    '''Queries the database for a track's
-        features and cluster label, query must be
-        in form : "track name, artist name" '''
-    query = str(query)
-    query = query.split(",")
-
-    q = f'''
-    SELECT * FROM track_clusters 
-    WHERE track_name ILIKE '{query[0]}'
-    AND artist ILIKE '{query[1]};'''
-
-    result = run_query(q)
-    seed_features = result.iloc[0,3:-1]
-    cluster = result.loc[0,'cluster']
-
-    return seed_features, cluster
-
-def check_database(query):
-    query = str(query)
-    query = query.split(",")
-    q = f'''
-    SELECT * FROM track_clusters
-    WHERE track_name ILIKE '%{query[0]}%'
-    AND artist ILIKE '%{query[1]}%'
-    ;'''
-    r = run_query(q)
-
-    if len(r) > 0:
-        return True
-    else:
-        return False
-
-def create_playlist(sp, recommended_tracks):
-    user_all_data = sp.current_user()
-    user_id = user_all_data["id"]
-
-    playlist_all_data = sp.user_playlist_create(user_id, "Friendship Playlist")
-    playlist_id = playlist_all_data["id"]
-    playlist_uri = playlist_all_data["uri"]
-    # try:
-    sp.user_playlist_add_tracks(user_id, playlist_id, recommended_tracks)
-    # except spotipy.client.SpotifyException as s:
-    # 	print("could not add tracks")
-
-    return playlist_uri
-
-def parse_query(query):
+#============================= General Utils ==================================#
+def check_query_format(query):
     query = query[:-1] if query.endswith(';') else query
     query = query.split(";")
 
@@ -212,7 +145,6 @@ def parse_query(query):
         except IndexError:
             return False
 
-
 def sort_inputs(query):
     not_in_db = []
     in_db = []
@@ -220,7 +152,6 @@ def sort_inputs(query):
     query = query[:-1] if query.endswith(';') else query
     query = query.split(";")
     
-
     for track in query:
         track = track.split(",")
 
@@ -233,24 +164,78 @@ def sort_inputs(query):
         '''
         r = run_query(q)
         
-        name = name.replace("_","'")
+        # name = name.replace("_","'")
         
         if len(r) > 0:
             in_db.append(name + "," + artist)
         else:
             not_in_db.append(name + " " + artist)
 
-    return in_db, not_in_db
+    return [in_db, not_in_db]
 
+def parse_and_sort_inputs(user_a_query, user_b_query):
+    '''Takes in both user's input strings, and sets up a 
+    dictionary to keep track of each user's inputs and 
+    whether they are in the database or not. Calls the 
+    sort_inputs function to parse and sort query strings.
+    Returns the resulting dictionary'''
+    # example user inputs
+    # user_a = "malibu, miley cyrus; video games, lana del rey; you're no good, linda ronstadt"
+    # user_b = "don't stop me now, queen; rocket man, elton john; toxic, britney spears"
+
+    # combines the form input into a list for interation; dict to store tracks
+    users = [user_a_query, user_b_query]
+    initial_inputs = {'user_a':None,
+                    'user_b':None}
+
+    # for each set of tracks, I need to keep track which tracks are in/not in the DB
+    for key,user in zip(initial_inputs.keys(),users):   
+        in_db, not_in_db = sort_inputs(user)
+        initial_inputs[key] = [in_db, not_in_db]
+
+
+    return initial_inputs
+
+def cos_sim(a,b):
+    '''Calculates the cosine similarity between two feature
+        vectors'''
+    d = np.dot(a, b)
+    l = (np.linalg.norm(a))*(np.linalg.norm(b))
+    return d/l
+
+
+# # for creating a spotify playlist from track_uris
+# def create_playlist(sp, recommended_tracks):
+#     user_all_data = sp.current_user()
+#     user_id = user_all_data["id"]
+
+#     playlist_all_data = sp.user_playlist_create(user_id, "Friendship Playlist")
+#     playlist_id = playlist_all_data["id"]
+#     playlist_uri = playlist_all_data["uri"]
+#     # try:
+#     sp.user_playlist_add_tracks(user_id, playlist_id, recommended_tracks)
+#     # except spotipy.client.SpotifyException as s:
+#     # 	print("could not add tracks")
+
+#     return playlist_uri
 #================================== IN DATABASE ===============================#
 def in_database(in_db):
+    '''takes in a list of tracks, parses it,
+    queries the db for each track's feature 
+    vector and genre, the appends each to
+    a df, then returns the df'''
+
     in_db_df = pd.DataFrame()
     for t in in_db:
         track = t.split(",")
         name = track[0]
+        artist = track[1]
 
-        q = f'''SELECT * FROM track_clusters
-            WHERE track_name ILIKE '%{name}%';
+        q = f'''SELECT a.*, b.genre 
+            FROM track_clusters a JOIN tracks b
+            ON a.track_id = b.track_id
+            WHERE a.track_name ILIKE '%{name}%'
+            AND a.artist ILIKE '%{artist}%';
             '''
         r = run_query(q)
         in_db_df = in_db_df.append(r)
@@ -261,8 +246,9 @@ def not_in_database(not_in_db):
     #search for a track and extract metadata from results
     metadata = {}
     for track in not_in_db:
-        track_id, preview_url, track_name, artist = search_and_extract(track) #using the input track name as the query to search spotify
-        metadata[track_id] = [preview_url,track_name,artist]
+        track_id, preview_url, track_name, artist, artist_id = search_and_extract(track) #using the input track name as the query to search spotify
+        genres = get_artist_genre(artist_id)
+        metadata[track_id] = [preview_url,track_name,artist,artist_id,genres]
 
     not_in_db_df = pd.DataFrame()
     no_url = {}
@@ -282,11 +268,12 @@ def not_in_database(not_in_db):
 
         #concatenating the two dfs so the feature vector will be in the same format as the db
         all_features = pd.concat([librosa_features,spotify_features],axis=1)
-        all_features.drop(['rmse','tempo_bpm','id','duration_ms','time_signature','mode','key'],axis=1, inplace=True)
+        all_features.drop(['id','duration_ms','time_signature','mode','key'],axis=1, inplace=True)
 
         #insert metadata into dataframe
         all_features.insert(1,'track_name',metadata[track_id][1])
         all_features.insert(2,'artist',metadata[track_id][2])
+        all_features.insert(48,'genre',metadata[track_id][4][0])
         
         not_in_db_df = not_in_db_df.append(all_features)
     
@@ -296,105 +283,142 @@ def not_in_database(not_in_db):
 def scale_features(not_in_db_df):
     # min-max scaling
     #querying for the database
-    q = '''SELECT a.*, b.*, c.track_name, c.artist
+    q = '''SELECT a.*, b.*
         FROM librosa_features a 
-        JOIN spotify_features b ON a.track_id = b.id
-        JOIN tracks c ON a.track_id = c.track_id;'''
+        JOIN spotify_features b ON a.track_id = b.id;'''
 
     database = run_query(q)
-    database.drop(['rmse','tempo_bpm','id','duration_ms','time_signature','mode','key','track_name','artist'],axis=1, inplace=True)
+    database.drop(['id','duration_ms','time_signature','mode','key'],axis=1, inplace=True)
+    i = len(database)
+    fv = not_in_db_df.drop(['track_name','artist','genre'],axis=1)
 
     #append feature vector to bottom of the db
-    database = pd.concat([database.iloc[:,1:],not_in_db_df.iloc[:,3:]],ignore_index=True)
+    database = pd.concat([database.iloc[:,1:],fv.iloc[:,1:]],ignore_index=True)
 
     # #apply a lambda function that does min-max normalization on the db
     database = database.apply(lambda x: (x - np.min(x)) / (np.max(x) - np.min(x)))
-
+    
     #overwrite features vector df
-    i = not_in_db_df.shape[0]
-    not_in_db_df.iloc[:,3:] = database.iloc[-i:,:].values
+    not_in_db_df.iloc[:,3:-1] = database.iloc[i:,:].values
     return not_in_db_df
 
-#============================= combining step ============================#
-def combine_frames(in_db, not_in_db, in_db_df, not_in_db_df):
-    if len(in_db_df) == 0 and len(not_in_db_df) == 0:
-        input_df = pd.DataFrame()
+
+#============================= Combining Steps ================================#
+def generate_user_df(user_lists):
+    '''MUST BE CALLED ON EACH USER KEY SEPARATELY
+    Takes in the keys of the initial_inputs dictionary.
+    This function calls the in_database and not_in_database
+    functions, then concatenates them to create the final
+    user dataframes needed to make recommendations. It
+    also stores the songs that could not be analyzed in the
+    no_url dictionary'''
     
-    if len(in_db) > 0 and len(not_in_db) > 0:
-        input_df = in_db_df.iloc[:,:-1]
-        input_df = input_df.append(not_in_db_df)
-
-    elif len(in_db) == 0 and len(not_in_db) > 0:
-        input_df = not_in_db_df
-
-    elif len(in_db_df) > 0 and len(not_in_db_df) == 0:
-        input_df = in_db_df.iloc[:,:-1]
-
-    input_df = input_df.reset_index(drop=True)
-    return input_df
-
-#============================== final steps ==============================#
-def get_cluster_df(input_df, km):
-    #get the mean
-    new_fv = input_df.mean()
-
-    #predict cluster
-    new_fv = new_fv.values
-    new_fv = new_fv.reshape(1,-1)
-
-    c = km.predict(new_fv)
-
-    #query the db for other tracks in the cluster
-    q = f'''
-    SELECT * FROM track_clusters WHERE cluster = {c[0]};'''
-    cluster_df = run_query(q)
-    return cluster_df, new_fv
-
-def get_results(cluster_df, new_fv, input_df, no_url):
-
-    distances = {}
-    for i,row in cluster_df.iterrows():
-        track_id = row['track_id']
-        dist = cos_sim(new_fv,row[3:-1])
-        distances[track_id] = dist
-
-    # #sorts the resulting dict for the top 3 most similar songs
-    top_three = sorted(distances, key=distances.get,reverse=True)[:10]
+    in_db_df = in_database(user_lists[0])
+    not_in_db_df, no_url = not_in_database(user_lists[1])
     
-    if len(input_df) == 1:
-        input_ids = str(input_df.loc[0,'track_id'])
+    if not_in_db_df.empty:
+        user_df = in_db_df
+    else:
+        not_in_db_df = scale_features(not_in_db_df)
+        user_df = pd.concat([in_db_df,not_in_db_df])
         
-        q = f'''
-            SELECT track_id, track_name, artist FROM track_clusters
-            WHERE (track_id IN {tuple(top_three)})
-            AND track_id != '{str(input_ids)}'
-            LIMIT 3;'''
-        res = run_query(q)
+    return user_df, no_url
 
-    elif len(input_df) == 0:
-        print("Sorry could not get recommendations for any track you supplied. Please try different tracks.")
-        sys.exit()
+def get_similar_track_ids(input_track_df):
+    '''
+    IMPORTANT:THIS FUNCTION IS MEANT FOR ITERATION
+    ----------------------------------------------
+    Takes in a pandas series of a single track
+    that contains track_id, and genre. Then queries
+    the db for all tracks in the same genre as the
+    input track. The cosine similarity is then 
+    calculated between the input track and all
+    other tracks within the genre. The top two
+    most similar track ids are returned in a list'''
     
-    elif len(input_df) > 1:
-        input_ids = tuple(input_df['track_id'])
+    track_id = input_track_df['track_id']
+    genre = input_track_df['genre']
+    
+    q =  f'''
+    SELECT * FROM track_clusters
+    WHERE track_id = '{track_id}';'''
+    features = run_query(q)
 
-        q = f'''
-        SELECT track_id, track_name, artist FROM track_clusters
-        WHERE (track_id IN {tuple(top_three)})
-        AND track_id NOT IN {input_ids}
-        LIMIT 3;'''
-        res = run_query(q)
+    
+    q2 = f'''
+    SELECT a.*, b.genre 
+    FROM tracks b
+    JOIN track_clusters a ON b.track_id = a.track_id
+    WHERE b.genre = '{genre}'
+    AND a.track_id != '{track_id}';'''
+    genre_tracks = run_query(q2)
+    
+    
+    all_scores = {}
+    for i,row in genre_tracks.iterrows():
+        track_id = row['track_id']
+        score = cos_sim(features.iloc[0,3:],row[3:-1])
+        all_scores[track_id] = score
 
-    #returns a df with the track name, artist, and distance value for recommended tracks
-    for i,row in res['track_id'].iteritems():
-        res.loc[i,'distance'] = distances[row]
+    most_similar = sorted(all_scores, 
+                          key=all_scores.get,
+                          reverse=True)[:2]
+    return most_similar
+
+def get_feature_vector_array(id_list):
+    '''
+    IMPORTANT:THIS FUNCTION IS MEANT FOR ITERATION
+    ----------------------------------------------
+    Takes in a list of track_ids, queries the
+    db for each track's feature vector, and returns
+    a 2D array of the feature vectors and cooresponding
+    track_ids as an index.
+    '''
+    id_list = set(id_list)
+    q = f'''
+    SELECT * FROM track_clusters
+    WHERE track_id IN {tuple(id_list)};'''
+    fv = run_query(q)
+
+    fv = fv.set_index('track_id')
+    index = fv.index
+    fv = fv.iloc[:,2:]
+    array = fv.values
     
-    res_df = res[['track_name','artist','distance']].sort_values('distance',ascending=False)
-    res_df = res_df.reset_index(drop=True)
-    # if len(no_url) > 0:
-    #     print("")
-    #     for k,v in no_url.items():
-    #         print(f"Could not analyze: {v[0]}, by {v[1]}")
-    return res_df, no_url
+    return index, array
+#============================== Final Steps ==================================#
+def create_similarity_matrix(user_a_array, user_a_index, user_b_array, user_b_index):
+    '''Takes in two 2D user arrays and their corresponding 
+    track_id indices, calculates the cosine similarity
+    between all tracks in each 2D array. Then sets up a
+    pandas dataframe of the similarity scores
+    '''
+    cosine_matrix = cosine_similarity(user_a_array,user_b_array)
+
+    cosine_df = pd.DataFrame(cosine_matrix,
+                            columns=user_b_index,
+                            index=user_a_index)
+
+    return cosine_df
+
+def get_combined_recommendations(cosine_df):
+    '''Takes in the cosine similarity dataframe as an
+    input, then finds the pairs of track that have 
+    the top 3 similarity scores. Queries the db
+    for the track metadata and uses the results as the
+    final recommendations'''
     
-    
+    scores = {}
+    for i,row in cosine_df.iterrows():
+        scores[max(row)] = [i,row.idxmax()]
+        
+    top_three = sorted(scores,reverse=True)[:3]
+
+    ids = [scores[i][0] for i in top_three] + [scores[i][1] for i in top_three]
+    ids = set(ids)
+
+    q = f'''
+    SELECT track_id, track_name, artist, genre FROM tracks
+    WHERE track_id IN {tuple(ids)};'''
+    final = run_query(q)
+    return final
