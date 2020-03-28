@@ -4,6 +4,7 @@ import sys
 from os import environ
 from flask import Flask, request, render_template, redirect, Response
 from project_utils import *
+from genre_replace import genre_replace
 import pandas as pd
 import numpy as np
 import psycopg2 as pg
@@ -70,6 +71,9 @@ def friendship_app():
 	for l in no_url_b.keys():
 		no_preview[l] = no_url_b[l]
 
+	# Mapping generalized genres to df
+	user_a_df = remap_genres(user_a_df)
+	user_b_df = remap_genres(user_b_df)
 
 	# Finding most similar songs to each user's input
 	user_a_recs = []

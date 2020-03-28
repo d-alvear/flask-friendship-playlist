@@ -14,6 +14,7 @@ import librosa
 import spotipy
 import spotipy.util as util
 import requests
+from genre_replace import genre_replace
 
 # connect to spotify_db
 conn = pg.connect(database="spotify_db",
@@ -26,10 +27,14 @@ client_credentials_manager = SpotifyClientCredentials(client_id=spotify_credenti
                                                       client_secret=spotify_credentials['client_secret'])
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
-# query_a = "the barrel, aldous harding; white freckles, ariel pink; a good night, john legend"
-# query_b = "ann's jam, chastity belt; comeback kid, sleigh bells; mami, piso 21"
-query_a = "BFF, Kesha; teenagers, my chemical romance; you're so vain, carly simon"
-query_b = "ball and chain, janis joplin; fire and rain, james taylor; in my feelings, drake"
+##====User A: pop, rock, classic rock
+##====User B: classic rock, classic rock, hip hop
+# query_a = "BFF, Kesha; teenagers, my chemical romance; you're so vain, carly simon"
+# query_b = "ball and chain, janis joplin; fire and rain, james taylor; in my feelings, drake"
+# query_a = "bad and boujee, migos; god's plan, drake; fade, kanye west"
+# query_b = "once in a lifetime, talking heads; crazy on you, heart; ramble on, led zeppelin"
+query_a = "never let you go, third eye blind; come as you are, nirvana; my song 5, haim"
+query_b = "dear to me, electric guest; good as hell, lizzo; talia, king princess"
 
 def friendship_app(query_a,query_b):
 	##~~~~ NEED TO CREATE SECOND INPUT FORM FOR USER B ~~~~##
@@ -59,7 +64,10 @@ def friendship_app(query_a,query_b):
 	for l in no_url_b.keys():
 		no_preview[l] = no_url_b[l]
 
-
+	# Mapping generalized genres to df
+	user_a_df = remap_genres(user_a_df)
+	user_b_df = remap_genres(user_b_df)
+	
 	# Finding most similar songs to each user's input
 	user_a_recs = []
 	for i,row in user_a_df.iterrows():
@@ -81,7 +89,11 @@ def friendship_app(query_a,query_b):
 										 user_b_index)
 
 	recommendations = get_combined_recommendations(cosine_df)
-
+	
+	if len(no_preview) > 0:
+		print("Could not get recommendations for:")
+		for i in no_preview.values():
+			print(i)
 	return recommendations
 
 recs = friendship_app(query_a,query_b)

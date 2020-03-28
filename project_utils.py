@@ -9,6 +9,7 @@ from spotipy.oauth2 import SpotifyClientCredentials
 import librosa
 import spotipy
 import requests
+from genre_replace import genre_replace
 from sklearn.metrics.pairwise import cosine_similarity
 
 client_credentials_manager = SpotifyClientCredentials(client_id=spotify_credentials['client_id'],
@@ -231,6 +232,8 @@ def in_database(in_db):
         name = track[0]
         artist = track[1]
 
+        name = name.replace("'","_")
+
         q = f'''SELECT a.*, b.genre 
             FROM track_clusters a JOIN tracks b
             ON a.track_id = b.track_id
@@ -302,6 +305,19 @@ def scale_features(not_in_db_df):
     not_in_db_df.iloc[:,3:-1] = database.iloc[i:,:].values
     return not_in_db_df
 
+def remap_genres(df):
+    for i,genre in df['genre'].iteritems():
+        if isinstance(genre,list):
+            for g in genre:
+                if g in genre_replace.keys():
+                    df.loc[i,'genre'] = genre_replace[g]
+                else:
+                    continue
+        elif isinstance(genre,str):
+            df.loc[i,'genre'] = genre_replace[genre]
+                
+    return df
+
 
 #============================= Combining Steps ================================#
 def generate_user_df(user_lists):
@@ -337,27 +353,28 @@ def get_similar_track_ids(input_track_df):
     most similar track ids are returned in a list'''
     
     track_id = input_track_df['track_id']
+    name = input_track_df['track_name']
     genre = input_track_df['genre']
+    features = input_track_df[3:-1]
     
-    q =  f'''
-    SELECT * FROM track_clusters
-    WHERE track_id = '{track_id}';'''
-    features = run_query(q)
+#     q =  f'''
+#     SELECT * FROM track_clusters
+#     WHERE track_id = '{track_id}';'''
+#     features = run_query(q)
 
-    
     q2 = f'''
     SELECT a.*, b.genre 
     FROM tracks b
     JOIN track_clusters a ON b.track_id = a.track_id
     WHERE b.genre = '{genre}'
-    AND a.track_id != '{track_id}';'''
+    AND a.track_id != '{track_id}' AND a.track_name NOT LIKE '%{name}%';'''
     genre_tracks = run_query(q2)
     
     
     all_scores = {}
     for i,row in genre_tracks.iterrows():
         track_id = row['track_id']
-        score = cos_sim(features.iloc[0,3:],row[3:-1])
+        score = cos_sim(features,row[3:-1])
         all_scores[track_id] = score
 
     most_similar = sorted(all_scores, 
