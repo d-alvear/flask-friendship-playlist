@@ -26,15 +26,19 @@
       <p>Input songs using the following format, using semicolons between songs:<br>
       <i>Bohemian Rhapsody, Queen; Heartbreak Hotel, Elvis; Toxic, Britney Spears</i></p>
       <form method="POST" action='search' >
-        <input name = "query" required type="text" maxlength="8000" placeholder="Search" style="height: 30px; width: 500px;">
-          <span class="input-group-btn">
+        <input name ="query_a" required type="text" maxlength="8000" placeholder="Friend 1" style="height: 30px; width: 500px;">
+      <p></p>
+        <form method="POST" action='search' >
+         <input name ="query_b" required type="text" maxlength="8000" placeholder="Friend 2" style="height: 30px; width: 500px;">
+      <p></p>
+         <span class="input-group-btn">
             <button class="btn btn-powder-green" onclick="window.location.href='{{playlist}}'" type="submit">Submit</button>
         </div>
       </form>
-      <section class="results">
+      <!-- <section class="results">
         <h3>Result</h3>
 
-      </section>
+      </section> -->
     </main>
 
 <!--      Your web-app is https, so your scripts need to be too -->
