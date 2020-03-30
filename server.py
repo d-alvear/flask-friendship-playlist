@@ -10,7 +10,6 @@ import numpy as np
 import psycopg2 as pg
 from psycopg2 import Error
 from spotipy.oauth2 import SpotifyClientCredentials
-from sklearn.cluster import KMeans
 import librosa
 import spotipy
 import spotipy.util as util
@@ -44,15 +43,18 @@ def homepage():
 
 @app.route('/search', methods=['POST','GET'])
 def friendship_app():
-	##~~~~ NEED TO CREATE SECOND INPUT FORM FOR USER B ~~~~##
-	query_a = request.form['query']
-	#query_b = request.form['query']
+	query_a = request.form['query_a']
+	query_b = request.form['query_b']
+
+	test = [query_a, query_b]
+
 
 	# REWRITE THIS TO CHECK BOTH USERS' QUERIES
-	if check_query_format(query) == False:
-		return "Your query doesn't look quite right, make sure it looks like the example. It should include the name of the song, and the artist, separated by a comma."
-	else:
-		pass
+	for t in test:
+		if check_query_format(t) == False:
+			return "One or both of your queries don't look quite right, make sure they look like the example. They should include the name of the song, and the artist, separated by a comma."
+		else:
+			pass
 
 	# Sorting each user's input tracks by whether they are in/not in the db
 	# Results are sorted into a dict
