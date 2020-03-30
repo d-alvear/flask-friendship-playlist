@@ -46,12 +46,9 @@ def friendship_app():
 	query_a = request.form['query_a']
 	query_b = request.form['query_b']
 
-	test = [query_a, query_b]
-
-
 	# REWRITE THIS TO CHECK BOTH USERS' QUERIES
-	for t in test:
-		if check_query_format(t) == False:
+	for q in [query_a, query_b]:
+		if check_query_format(q) == False:
 			return "One or both of your queries don't look quite right, make sure they look like the example. They should include the name of the song, and the artist, separated by a comma."
 		else:
 			pass
