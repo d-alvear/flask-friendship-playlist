@@ -33,8 +33,8 @@ sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 # query_b = "ball and chain, janis joplin; fire and rain, james taylor; in my feelings, drake"
 # query_a = "bad and boujee, migos; god's plan, drake; fade, kanye west"
 # query_b = "once in a lifetime, talking heads; crazy on you, heart; ramble on, led zeppelin"
-query_a = "never let you go, third eye blind; come as you are, nirvana; my song 5, haim"
-query_b = "dear to me, electric guest; good as hell, lizzo; talia, king princess"
+query_a = "never let you go, third eye blind; summer girl, haim; my song 5, haim"
+query_b = "juice, lizzo; good as hell, lizzo; talia, king princess"
 
 def friendship_app(query_a,query_b):
 	##~~~~ NEED TO CREATE SECOND INPUT FORM FOR USER B ~~~~##
