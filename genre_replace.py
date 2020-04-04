@@ -152,5 +152,15 @@ genre_replace = {'art pop':'indie',
                  'country':'country',
                  'electronic':'electronic',
                  'metal':'metal',
-                 'r&b':'r&b'
+                 'r&b':'r&b',
+                 'hollywood':'soundtrack',
+                 'background music':'ambient',
+                 'lo-fi beats':'electronic',
+                 'chillhop':'electronic',
+                 'classical':'classical',
+                 'new wave pop':'pop',
+                 'soul':'r&b',
+                 'modern blues':'r&b',
+                 'swedish pop':'pop',
+                 'europop':'pop'
                  }

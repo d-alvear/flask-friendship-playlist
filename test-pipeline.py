@@ -15,6 +15,7 @@ import spotipy
 import spotipy.util as util
 import requests
 from genre_replace import genre_replace
+import time
 
 # connect to spotify_db
 conn = pg.connect(database="spotify_db",
@@ -96,5 +97,7 @@ def friendship_app(query_a,query_b):
 			print(i)
 	return recommendations
 
+start = time.time()
 recs = friendship_app(query_a,query_b)
-print(recs)
+end = time.time()
+print(recs, end-start)

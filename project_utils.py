@@ -159,7 +159,7 @@ def sort_inputs(query):
         name = track[0].strip()
         artist = track[1].strip()
 
-        q = f'''SELECT * FROM track_clusters
+        q = f'''SELECT * FROM norm_tracks
         WHERE track_name ILIKE '%{name}%'
         AND artist ILIKE '%{artist}%';
         '''
@@ -235,7 +235,7 @@ def in_database(in_db):
         name = name.replace("'","_")
 
         q = f'''SELECT a.*, b.genre 
-            FROM track_clusters a JOIN tracks b
+            FROM norm_tracks a JOIN track_metadata b
             ON a.track_id = b.track_id
             WHERE a.track_name ILIKE '%{name}%'
             AND a.artist ILIKE '%{artist}%';
@@ -286,12 +286,9 @@ def not_in_database(not_in_db):
 def scale_features(not_in_db_df):
     # min-max scaling
     #querying for the database
-    q = '''SELECT a.*, b.*
-        FROM librosa_features a 
-        JOIN spotify_features b ON a.track_id = b.id;'''
+    q = '''SELECT * FROM raw_tracks'''
 
     database = run_query(q)
-    database.drop(['id','duration_ms','time_signature','mode','key'],axis=1, inplace=True)
     i = len(database)
     fv = not_in_db_df.drop(['track_name','artist','genre'],axis=1)
 
@@ -352,29 +349,21 @@ def get_similar_track_ids(input_track_df):
     other tracks within the genre. The top two
     most similar track ids are returned in a list'''
     
-    track_id = input_track_df['track_id']
-    name = input_track_df['track_name']
-    genre = input_track_df['genre']
-    features = input_track_df[3:-1]
-    
-#     q =  f'''
-#     SELECT * FROM track_clusters
-#     WHERE track_id = '{track_id}';'''
-#     features = run_query(q)
+    name = input_track_df['track_name'].replace("'","_")
 
     q2 = f'''
     SELECT a.*, b.genre 
-    FROM tracks b
-    JOIN track_clusters a ON b.track_id = a.track_id
-    WHERE b.genre = '{genre}'
-    AND a.track_id != '{track_id}' AND a.track_name NOT LIKE '%{name}%';'''
+    FROM norm_tracks a
+    JOIN track_metadata b ON a.track_id = b.track_id
+    WHERE b.genre = '{input_track_df['genre']}'
+    AND a.track_id != '{input_track_df['track_id']}' 
+    AND a.track_name NOT LIKE '%{name}%';'''
     genre_tracks = run_query(q2)
-    
     
     all_scores = {}
     for i,row in genre_tracks.iterrows():
         track_id = row['track_id']
-        score = cos_sim(features,row[3:-1])
+        score = cos_sim(input_track_df[3:-1],row[3:-1])
         all_scores[track_id] = score
 
     most_similar = sorted(all_scores, 
@@ -393,7 +382,7 @@ def get_feature_vector_array(id_list):
     '''
     id_list = set(id_list)
     q = f'''
-    SELECT * FROM track_clusters
+    SELECT * FROM norm_tracks
     WHERE track_id IN {tuple(id_list)};'''
     fv = run_query(q)
 
@@ -435,7 +424,7 @@ def get_combined_recommendations(cosine_df):
     ids = set(ids)
 
     q = f'''
-    SELECT track_id, track_name, artist, genre FROM tracks
+    SELECT track_id, track_name, artist, genre FROM track_metadata
     WHERE track_id IN {tuple(ids)};'''
     final = run_query(q)
     return final
