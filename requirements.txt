@@ -2,3 +2,8 @@ Flask
 gunicorn
 requests
 spotipy
+pandas
+numpy
+psycopg2
+librosa
+sklearn
