@@ -15,7 +15,7 @@ import spotipy
 import spotipy.util as util
 import requests
 from genre_replace import genre_replace
-import time
+# import time
 
 # connect to spotify_db
 conn = pg.connect(database="spotify_db",
@@ -30,10 +30,10 @@ sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 ##====User A: pop, rock, classic rock
 ##====User B: classic rock, classic rock, hip hop
-# query_a = "BFF, Kesha; teenagers, my chemical romance; you're so vain, carly simon"
-# query_b = "ball and chain, janis joplin; fire and rain, james taylor; in my feelings, drake"
-query_a = "bad and boujee, migos; god's plan, drake; fade, kanye west"
-query_b = "once in a lifetime, talking heads; crazy on you, heart; ramble on, led zeppelin"
+query_a = "BFF, Kesha; teenagers, my chemical romance; you're so vain, carly simon"
+query_b = "ball and chain, janis joplin; fire and rain, james taylor; in my feelings, drake"
+# query_a = "bad and boujee, migos; god's plan, drake; fade, kanye west"
+# query_b = "once in a lifetime, talking heads; crazy on you, heart; ramble on, led zeppelin"
 # query_a = "never let you go, third eye blind; summer girl, haim; my song 5, haim"
 # query_b = "juice, lizzo; good as hell, lizzo; talia, king princess"
 
@@ -56,8 +56,8 @@ def friendship_app(query_a,query_b):
 
 
 	# Creating a df with the feature vectors of each user's input tracks
-	# user_a_df = generate_user_df(user_a_df,user_a_to_get)
-	# user_b_df = generate_user_df(user_b_df,user_b_to_get)
+	user_a_df = generate_user_df(user_a_df,user_a_to_get)
+	user_b_df = generate_user_df(user_b_df,user_b_to_get)
 
 
 	# # storing songs that couldn't be analyzed, separate loops because dicts
@@ -70,42 +70,40 @@ def friendship_app(query_a,query_b):
 	# 	no_preview[l] = no_url_b[l]
 
 	# Mapping generalized genres to df
-	# user_a_df = remap_genres(user_a_df)
-	# user_b_df = remap_genres(user_b_df)
+	user_a_df = remap_genres(user_a_df)
+	user_b_df = remap_genres(user_b_df)
 
 	
 	# # Finding most similar songs to each user's input
-	# user_a_recs = []
-	# for i,row in user_a_df.iterrows():
-	# 	rec = get_similar_track_ids(row)
-	# 	user_a_recs.extend(rec)
-
-	# return user_a_recs
+	user_a_recs = []
+	for i,row in user_a_df.iterrows():
+		rec = get_similar_track_ids(row)
+		user_a_recs.extend(rec)
 		
-	# user_a_index, user_a_array = get_feature_vector_array(user_a_recs)
+	user_a_index, user_a_array = get_feature_vector_array(user_a_recs)
 
-	# user_b_recs = []
-	# for i,row in user_b_df.iterrows():
-	# 	rec = get_similar_track_ids(row)
-	# 	user_b_recs.extend(rec)
+	user_b_recs = []
+	for i,row in user_b_df.iterrows():
+		rec = get_similar_track_ids(row)
+		user_b_recs.extend(rec)
 		
-	# user_b_index, user_b_array = get_feature_vector_array(user_b_recs)
+	user_b_index, user_b_array = get_feature_vector_array(user_b_recs)
 
 
-	# cosine_df = create_similarity_matrix(user_a_array,
-	# 									 user_a_index,
-	# 									 user_b_array,
-	# 									 user_b_index)
+	cosine_df = create_similarity_matrix(user_a_array,
+										 user_a_index,
+										 user_b_array,
+										 user_b_index)
 
-	# recommendations = get_combined_recommendations(cosine_df)
+	recommendations = get_combined_recommendations(cosine_df)
 	
 	# if len(no_preview) > 0:
 	# 	print("Could not get recommendations for:")
 	# 	for i in no_preview.values():
 	# 		print(i)
-	# return recommendations
+	return recommendations
 
-start = time.time()
-friendship_app(query_a,query_b)
-end = time.time()
-print(end-start)
+# start = time.time()
+r = friendship_app(query_a,query_b)
+# end = time.time()
+print(r, end-start)

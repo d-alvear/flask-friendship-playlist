@@ -176,11 +176,8 @@ def sort_inputs(query):
             user_df = user_df.append(r,ignore_index=True)
         else:
             not_in_db.append(name + " " + artist)
-
-        if user_df.empty:
-            return (0, not_in_db)
-        else:
-            return (user_df, not_in_db)
+    
+    return (user_df, not_in_db)
 
 def parse_and_sort_inputs(user_a_query, user_b_query):
     '''Takes in both user's input strings, and sets up a 
@@ -318,7 +315,7 @@ def remap_genres(df):
 
 
 #============================= Combining Steps ================================#
-def generate_user_df(df, to_get):
+def generate_user_df(user_input_df, to_get):
     '''MUST BE CALLED ON EACH USER KEY SEPARATELY
     Takes in the keys of the initial_inputs dictionary.
     This function calls the in_database and not_in_database
@@ -330,11 +327,13 @@ def generate_user_df(df, to_get):
     # in_db_df = in_database(user_lists[0])
     not_in_db_df = not_in_database(to_get)
     
-    if not_in_db_df.empty:
-        user_df = df
+    if (not_in_db_df.empty == True) and (user_input_df.empty == False):
+        user_df = user_input_df
+    elif (not_in_db_df.empty == False) and (user_input_df.empty == True):
+        user_df = scale_features(not_in_db_df)
     else:
         not_in_db_df = scale_features(not_in_db_df)
-        user_df = pd.concat([df,not_in_db_df],ignore_index=True)
+        user_df = pd.concat([user_input_df,not_in_db_df],ignore_index=True)
 
     return user_df
 
