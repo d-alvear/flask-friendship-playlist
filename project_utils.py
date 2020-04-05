@@ -11,6 +11,7 @@ import spotipy
 import requests
 from genre_replace import genre_replace
 from sklearn.metrics.pairwise import cosine_similarity
+import time
 
 client_credentials_manager = SpotifyClientCredentials(client_id=spotify_credentials['client_id'],
                                                       client_secret=spotify_credentials['client_secret'])
@@ -148,7 +149,7 @@ def check_query_format(query):
 
 def sort_inputs(query):
     not_in_db = []
-    in_db = []
+    user_df = pd.DataFrame()
     query = query.replace("'","_")
     query = query[:-1] if query.endswith(';') else query
     query = query.split(";")
@@ -159,20 +160,27 @@ def sort_inputs(query):
         name = track[0].strip()
         artist = track[1].strip()
 
-        q = f'''SELECT * FROM norm_tracks
-        WHERE track_name ILIKE '%{name}%'
-        AND artist ILIKE '%{artist}%';
-        '''
+        q = f'''SELECT a.*, b.genre 
+            FROM norm_tracks a 
+                JOIN track_metadata b
+                ON a.track_id = b.track_id
+            WHERE a.track_name ILIKE '%{name}%'
+            AND a.artist ILIKE '%{artist}%'
+            LIMIT 1
+            '''
         r = run_query(q)
         
         name = name.replace("_","'")
         
         if len(r) > 0:
-            in_db.append(name + "," + artist)
+            user_df = user_df.append(r,ignore_index=True)
         else:
             not_in_db.append(name + " " + artist)
 
-    return [in_db, not_in_db]
+        if user_df.empty:
+            return (0, not_in_db)
+        else:
+            return (user_df, not_in_db)
 
 def parse_and_sort_inputs(user_a_query, user_b_query):
     '''Takes in both user's input strings, and sets up a 
@@ -180,9 +188,6 @@ def parse_and_sort_inputs(user_a_query, user_b_query):
     whether they are in the database or not. Calls the 
     sort_inputs function to parse and sort query strings.
     Returns the resulting dictionary'''
-    # example user inputs
-    # user_a = "malibu, miley cyrus; video games, lana del rey; you're no good, linda ronstadt"
-    # user_b = "don't stop me now, queen; rocket man, elton john; toxic, britney spears"
 
     # combines the form input into a list for interation; dict to store tracks
     users = [user_a_query, user_b_query]
@@ -227,18 +232,12 @@ def in_database(in_db):
     a df, then returns the df'''
 
     in_db_df = pd.DataFrame()
-    for t in in_db:
-        track = t.split(",")
-        name = track[0]
-        artist = track[1]
-
-        name = name.replace("'","_")
-
+    for track_id in in_db:
         q = f'''SELECT a.*, b.genre 
             FROM norm_tracks a JOIN track_metadata b
             ON a.track_id = b.track_id
-            WHERE a.track_name ILIKE '%{name}%'
-            AND a.artist ILIKE '%{artist}%';
+            WHERE a.track_id = '%{track_id}%'
+            LIMIT 1
             '''
         r = run_query(q)
         in_db_df = in_db_df.append(r)
@@ -254,11 +253,13 @@ def not_in_database(not_in_db):
         metadata[track_id] = [preview_url,track_name,artist,artist_id,genres]
 
     not_in_db_df = pd.DataFrame()
-    no_url = {}
+    # no_url = {}
     for track_id in metadata.keys():
         if metadata[track_id][0] == None:
-            no_url[track_id] = [metadata[track_id][1],metadata[track_id][2]]
             continue
+        # else:
+        #     # no_url[track_id] = [metadata[track_id][1],metadata[track_id][2]]
+        #     continue
         
         spotify_features = extract_features(track_id)
         get_mp3(metadata[track_id][0],track_id)
@@ -281,7 +282,7 @@ def not_in_database(not_in_db):
         not_in_db_df = not_in_db_df.append(all_features)
     
     not_in_db_df = not_in_db_df.reset_index(drop=True)
-    return not_in_db_df, no_url
+    return not_in_db_df
 
 def scale_features(not_in_db_df):
     # min-max scaling
@@ -317,7 +318,7 @@ def remap_genres(df):
 
 
 #============================= Combining Steps ================================#
-def generate_user_df(user_lists):
+def generate_user_df(df, to_get):
     '''MUST BE CALLED ON EACH USER KEY SEPARATELY
     Takes in the keys of the initial_inputs dictionary.
     This function calls the in_database and not_in_database
@@ -326,16 +327,16 @@ def generate_user_df(user_lists):
     also stores the songs that could not be analyzed in the
     no_url dictionary'''
     
-    in_db_df = in_database(user_lists[0])
-    not_in_db_df, no_url = not_in_database(user_lists[1])
+    # in_db_df = in_database(user_lists[0])
+    not_in_db_df = not_in_database(to_get)
     
     if not_in_db_df.empty:
-        user_df = in_db_df
+        user_df = df
     else:
         not_in_db_df = scale_features(not_in_db_df)
-        user_df = pd.concat([in_db_df,not_in_db_df])
-        
-    return user_df, no_url
+        user_df = pd.concat([df,not_in_db_df],ignore_index=True)
+
+    return user_df
 
 def get_similar_track_ids(input_track_df):
     '''
@@ -356,7 +357,6 @@ def get_similar_track_ids(input_track_df):
     FROM norm_tracks a
     JOIN track_metadata b ON a.track_id = b.track_id
     WHERE b.genre = '{input_track_df['genre']}'
-    AND a.track_id != '{input_track_df['track_id']}' 
     AND a.track_name NOT LIKE '%{name}%';'''
     genre_tracks = run_query(q2)
     
@@ -368,13 +368,11 @@ def get_similar_track_ids(input_track_df):
 
     most_similar = sorted(all_scores, 
                           key=all_scores.get,
-                          reverse=True)[:2]
+                          reverse=True)[1:3]
     return most_similar
 
 def get_feature_vector_array(id_list):
     '''
-    IMPORTANT:THIS FUNCTION IS MEANT FOR ITERATION
-    ----------------------------------------------
     Takes in a list of track_ids, queries the
     db for each track's feature vector, and returns
     a 2D array of the feature vectors and cooresponding
@@ -414,9 +412,11 @@ def get_combined_recommendations(cosine_df):
     for the track metadata and uses the results as the
     final recommendations'''
     
-    scores = {}
-    for i,row in cosine_df.iterrows():
-        scores[max(row)] = [i,row.idxmax()]
+    # scores = {}
+    # for i,row in cosine_df.iterrows():
+    #     scores[max(row)] = [i,row.idxmax()]
+
+    scores = {max(row): [i,row.idxmax()] for i, row in cosine_df.iterrows() }
         
     top_three = sorted(scores,reverse=True)[:3]
 
