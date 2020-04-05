@@ -1,6 +1,6 @@
 import sys
 from os import environ
-from secret import sql_password, spotify_credentials
+from secret import sql_credentials, spotify_credentials
 import pandas as pd
 import numpy as np
 import psycopg2 as pg
@@ -18,9 +18,11 @@ client_credentials_manager = SpotifyClientCredentials(client_id=spotify_credenti
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 #=============================== SQL Utils ====================================#
-conn = pg.connect(database="spotify_db",
-                  user="postgres", 
-                  password=sql_password)
+conn = pg.connect(database=sql_credentials['database'],
+                  user=sql_credentials['user'], 
+                  password=sql_credentials['password'],
+                  host =sql_credentials['host'])
+
 
 def run_query(q):
     '''a function that takes a SQL query as an argument
