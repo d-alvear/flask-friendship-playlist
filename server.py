@@ -5,6 +5,7 @@ from os import environ
 from flask import Flask, request, render_template, redirect, Response
 from project_utils import *
 from genre_replace import genre_replace
+from secret import *
 import pandas as pd
 import numpy as np
 import psycopg2 as pg
@@ -16,13 +17,19 @@ import spotipy.util as util
 import requests
 
 # connect to spotify_db
-conn = pg.connect(database="spotify_db",
-				  user="postgres", 
-				  password=sql_password)
+conn = pg.connect(database=sql_credentials['database'],
+                  user=sql_credentials['user'], 
+                  password=sql_credentials['password'],
+                  host =sql_credentials['host'])
+
+# conn = pg.connect(database="spotify_db",
+# 				  user="postgres", 
+# 				  password=sql_password)
 
 
 # Authenticate with Spotify using the Client Credentials flow
-client_credentials_manager = SpotifyClientCredentials(client_id=environ.get('SPOTIPY_CLIENT_ID'),client_secret=environ.get('SPOTIPY_CLIENT_SECRET'))
+client_credentials_manager = SpotifyClientCredentials(client_id=spotify_credentials['client_id'],
+													  client_secret=spotify_credentials['client_secret'])
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 
@@ -41,7 +48,7 @@ def authenticate_user():
 def homepage():
 	return render_template('index.html')
 
-@app.route('/search', methods=['POST','GET'])
+@app.route('/results', methods=['POST','GET'])
 def friendship_app():
 	query_a = request.form['query_a']
 	query_b = request.form['query_b']
@@ -55,20 +62,26 @@ def friendship_app():
 
 	# Sorting each user's input tracks by whether they are in/not in the db
 	# Results are sorted into a dict
-	initial_inputs = parse_and_sort_inputs(query_a,query_b)
+	# initial_inputs = parse_and_sort_inputs(query_a,query_b)
+
+	user_a_df, user_a_to_get = sort_inputs(query_a)
+	user_b_df, user_b_to_get = sort_inputs(query_b)
 
 	# Creating a df with the feature vectors of each user's input tracks
-	user_a_df, no_url_a = generate_user_df(initial_inputs['user_a'])
-	user_b_df, no_url_b = generate_user_df(initial_inputs['user_b'])
+	# user_a_df, no_url_a = generate_user_df(initial_inputs['user_a'])
+	# user_b_df, no_url_b = generate_user_df(initial_inputs['user_b'])
+
+	user_a_df = generate_user_df(user_a_df,user_a_to_get)
+	user_b_df = generate_user_df(user_b_df,user_b_to_get)
 
 	# storing songs that couldn't be analyzed, separate loops because dicts
 	# could be different lengths
-	no_preview = {}
-	for k in no_url_a.keys():
-		no_preview[k] = no_url_a[k]
+	# no_preview = {}
+	# for k in no_url_a.keys():
+	# 	no_preview[k] = no_url_a[k]
     
-	for l in no_url_b.keys():
-		no_preview[l] = no_url_b[l]
+	# for l in no_url_b.keys():
+	# 	no_preview[l] = no_url_b[l]
 
 	# Mapping generalized genres to df
 	user_a_df = remap_genres(user_a_df)
@@ -96,7 +109,9 @@ def friendship_app():
 
 	recommendations = get_combined_recommendations(cosine_df)
 
-	return recommendations.to_html()
+	return render_template('results.html', 
+							tables=[recommendations[['track_name','artist','genre']].to_html(classes='data')], 
+							titles=[recommendations.columns.values])
 
 if __name__ == '__main__':
 	app.run()

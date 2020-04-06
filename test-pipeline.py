@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import sys
 from os import environ
-from secret import spotify_credentials,sql_password
+from secret import *
 from flask import Flask, request, render_template, redirect, Response
 from project_utils import *
 import pandas as pd
@@ -30,12 +30,14 @@ sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 ##====User A: pop, rock, classic rock
 ##====User B: classic rock, classic rock, hip hop
-query_a = "BFF, Kesha; teenagers, my chemical romance; you're so vain, carly simon"
-query_b = "ball and chain, janis joplin; fire and rain, james taylor; in my feelings, drake"
+# query_a = "BFF, Kesha; teenagers, my chemical romance; you're so vain, carly simon"
+# query_b = "ball and chain, janis joplin; fire and rain, james taylor; in my feelings, drake"
 # query_a = "bad and boujee, migos; god's plan, drake; fade, kanye west"
 # query_b = "once in a lifetime, talking heads; crazy on you, heart; ramble on, led zeppelin"
 # query_a = "never let you go, third eye blind; summer girl, haim; my song 5, haim"
 # query_b = "juice, lizzo; good as hell, lizzo; talia, king princess"
+query_a="never let you go, third eye blind; summer girl, haim; my song 5, haim"
+query_b="once in a lifetime, talking heads; never let you go, third eye blind; fade, kanye west"
 
 def friendship_app(query_a,query_b):
 	##~~~~ NEED TO CREATE SECOND INPUT FORM FOR USER B ~~~~##
@@ -103,7 +105,7 @@ def friendship_app(query_a,query_b):
 	# 		print(i)
 	return recommendations
 
-# start = time.time()
+start = time.time()
 r = friendship_app(query_a,query_b)
-# end = time.time()
+end = time.time()
 print(r, end-start)

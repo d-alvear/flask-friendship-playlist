@@ -1,4 +1,3 @@
 *.env
 secret.py
-*.mp3
 *.ipynb
