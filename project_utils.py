@@ -25,7 +25,7 @@ conn = pg.connect(database=sql_credentials['database'],
 
 # conn = pg.connect(database="spotify_db",
 # 				  user="postgres", 
-# 				  password=sql_password)
+# 				  password=)
 
 def run_query(q):
     '''a function that takes a SQL query as an argument
@@ -91,12 +91,23 @@ def get_mp3(url,track_id):
         directory "audio-files"'''
     try:
         doc = requests.get(url)
-        with open(f'audio-files/track_{track_id}.mp3', 'wb') as f:
+        with open(f'/tmp/track_{track_id}.mp3', 'wb') as f:
             f.write(doc.content)
     except:
         pass
+    
+    return (f'/tmp/track_{track_id}.mp3')
 
-def librosa_pipeline(track_id):
+    # try:
+    #     doc = requests.get(url)
+    #     f = open(f'/tmp/track_{track_id}.mp3', 'wb')
+    #     f.write(doc.content)
+    #     f.close()
+    #     return f
+    # except:
+    #     pass
+
+def librosa_pipeline(path,track_id):
     '''This function takes in a spotify track_id as a string
         and uploads the cooresponding mp3 preview from a local
         directory. The mp3 then goes through the feature
@@ -107,13 +118,13 @@ def librosa_pipeline(track_id):
         * MP3 file must be in the directory in the form below
         '''
 
-    track = f'audio-files/track_{track_id}.mp3'
+    # track = f'audio-files/track_{track_id}.mp3'
 
     d = {}
     d['track_id'] = track_id
 
     #load mp3
-    y, sr = librosa.load(track, mono=True, duration=30)
+    y, sr = librosa.load(path, mono=True, duration=30)
 
     #feature extraction
     spec_cent = librosa.feature.spectral_centroid(y=y, sr=sr)
@@ -259,15 +270,17 @@ def not_in_database(not_in_db):
     for track_id in metadata.keys():
         if metadata[track_id][0] == None:
             continue
+        else:
+            pass
         # else:
         #     # no_url[track_id] = [metadata[track_id][1],metadata[track_id][2]]
         #     continue
         
         spotify_features = extract_features(track_id)
-        get_mp3(metadata[track_id][0],track_id)
+        path = get_mp3(metadata[track_id][0],track_id)
 
         #use librosa to extract audio features
-        r = librosa_pipeline(track_id)
+        r = librosa_pipeline(path,track_id)
 
         #turning dict into datframe
         librosa_features = pd.DataFrame(r,index=[0])
@@ -331,7 +344,7 @@ def generate_user_df(user_input_df, to_get):
     
     # in_db_df = in_database(user_lists[0])
     not_in_db_df = not_in_database(to_get)
-    
+
     if (not_in_db_df.empty == True) and (user_input_df.empty == False):
         user_df = user_input_df
     elif (not_in_db_df.empty == False) and (user_input_df.empty == True):
