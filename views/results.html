@@ -14,17 +14,21 @@
     <link rel="stylesheet" href="/static/style.css">
   </head>
   <body>
-    <header>
-      <h1>
-        Friendship Playlist
-      </h1>
+      <h1>Friendship Playlist</h1>
       <section class="results">
         <h2>Your Friendship Playlist</h2>
-        <body>
+        <div>
+        <span>
           {% for table in tables %}
             {{ table|safe }}
           {% endfor %}
-          </body>
+        </span>
+        <!-- <span>
+          {% for table in tables %}
+            {{ table|safe }}
+          {% endfor %}
+        </span> -->
+        </div>
       </section>
     </main>
 

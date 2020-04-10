@@ -238,24 +238,24 @@ def cos_sim(a,b):
 
 #     return playlist_uri
 #================================== IN DATABASE ===============================#
-def in_database(in_db):
-    '''takes in a list of tracks, parses it,
-    queries the db for each track's feature 
-    vector and genre, the appends each to
-    a df, then returns the df'''
+# def in_database(in_db):
+#     '''takes in a list of tracks, parses it,
+#     queries the db for each track's feature 
+#     vector and genre, the appends each to
+#     a df, then returns the df'''
 
-    in_db_df = pd.DataFrame()
-    for track_id in in_db:
-        q = f'''SELECT a.*, b.genre 
-            FROM norm_tracks a JOIN track_metadata b
-            ON a.track_id = b.track_id
-            WHERE a.track_id = '%{track_id}%'
-            LIMIT 1
-            '''
-        r = run_query(q)
-        in_db_df = in_db_df.append(r)
+#     in_db_df = pd.DataFrame()
+#     for track_id in in_db:
+#         q = f'''SELECT a.*, b.genre 
+#             FROM norm_tracks a JOIN track_metadata b
+#             ON a.track_id = b.track_id
+#             WHERE a.track_id = '%{track_id}%'
+#             LIMIT 1
+#             '''
+#         r = run_query(q)
+#         in_db_df = in_db_df.append(r)
 
-    return in_db_df
+#     return in_db_df
 #================================ NOT IN DATABASE =============================#
 def not_in_database(not_in_db):
     #search for a track and extract metadata from results
@@ -266,15 +266,13 @@ def not_in_database(not_in_db):
         metadata[track_id] = [preview_url,track_name,artist,artist_id,genres]
 
     not_in_db_df = pd.DataFrame()
-    # no_url = {}
+    no_url = {}
     for track_id in metadata.keys():
         if metadata[track_id][0] == None:
+            no_url[track_id] = [metadata[track_id][1],metadata[track_id][2]]
             continue
         else:
             pass
-        # else:
-        #     # no_url[track_id] = [metadata[track_id][1],metadata[track_id][2]]
-        #     continue
         
         spotify_features = extract_features(track_id)
         path = get_mp3(metadata[track_id][0],track_id)
@@ -297,7 +295,7 @@ def not_in_database(not_in_db):
         not_in_db_df = not_in_db_df.append(all_features)
     
     not_in_db_df = not_in_db_df.reset_index(drop=True)
-    return not_in_db_df
+    return not_in_db_df, no_url
 
 def scale_features(not_in_db_df):
     # min-max scaling
@@ -343,7 +341,7 @@ def generate_user_df(user_input_df, to_get):
     no_url dictionary'''
     
     # in_db_df = in_database(user_lists[0])
-    not_in_db_df = not_in_database(to_get)
+    not_in_db_df, no_url = not_in_database(to_get)
 
     if (not_in_db_df.empty == True) and (user_input_df.empty == False):
         user_df = user_input_df
@@ -353,7 +351,7 @@ def generate_user_df(user_input_df, to_get):
         not_in_db_df = scale_features(not_in_db_df)
         user_df = pd.concat([user_input_df,not_in_db_df],ignore_index=True)
 
-    return user_df
+    return user_df, no_url
 
 def get_similar_track_ids(input_track_df):
     '''
@@ -367,26 +365,36 @@ def get_similar_track_ids(input_track_df):
     other tracks within the genre. The top two
     most similar track ids are returned in a list'''
     
-    name = input_track_df['track_name'].replace("'","_")
-
-    q2 = f'''
-    SELECT a.*, b.genre 
-    FROM norm_tracks a
-    JOIN track_metadata b ON a.track_id = b.track_id
-    WHERE b.genre = '{input_track_df['genre']}'
-    AND a.track_name NOT LIKE '%{name}%';'''
-    genre_tracks = run_query(q2)
+    genres = input_track_df.loc[:,'genre'].unique()
     
-    all_scores = {}
-    for i,row in genre_tracks.iterrows():
-        track_id = row['track_id']
-        score = cos_sim(input_track_df[3:-1],row[3:-1])
-        all_scores[track_id] = score
+    if len(genres) > 1:
+        q = f'''
+        SELECT a.*, b.genre 
+        FROM norm_tracks a
+        JOIN track_metadata b ON a.track_id = b.track_id
+        WHERE b.genre IN {tuple(genres)};'''
+        genre_tracks = run_query(q)
 
-    most_similar = sorted(all_scores, 
-                          key=all_scores.get,
-                          reverse=True)[1:3]
-    return most_similar
+    elif len(genres) == 1:
+        q = f'''
+        SELECT a.*, b.genre 
+        FROM norm_tracks a
+        JOIN track_metadata b ON a.track_id = b.track_id
+        WHERE b.genre = '{genres[0]}';'''
+        genre_tracks = run_query(q)
+
+    recs = []
+    for i,row in input_track_df.iterrows():
+        all_scores = {}
+        for j,record in genre_tracks[genre_tracks['genre']==input_track_df.loc[i,'genre']].iterrows():
+            track_id = record['track_id']
+            score = cos_sim(row[3:-1],record[3:-1])
+            all_scores[track_id] = score
+
+        most_similar = sorted(all_scores,key=all_scores.get,reverse=True)[1:3]
+        recs.extend(most_similar)
+
+    return recs
 
 def get_feature_vector_array(id_list):
     '''
@@ -428,10 +436,6 @@ def get_combined_recommendations(cosine_df):
     the top 3 similarity scores. Queries the db
     for the track metadata and uses the results as the
     final recommendations'''
-    
-    # scores = {}
-    # for i,row in cosine_df.iterrows():
-    #     scores[max(row)] = [i,row.idxmax()]
 
     scores = {max(row): [i,row.idxmax()] for i, row in cosine_df.iterrows() }
         
