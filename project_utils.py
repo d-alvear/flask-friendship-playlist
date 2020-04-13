@@ -376,7 +376,7 @@ def get_similar_track_ids(input_track_df):
         JOIN track_metadata b ON a.track_id = b.track_id;'''
         all_tracks = run_query(q)
     
-    genres.remove(None)
+    genres = genres[genres != None]
     
     if len(genres) > 1:
         q = f'''
