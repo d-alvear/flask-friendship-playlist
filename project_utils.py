@@ -325,7 +325,10 @@ def remap_genres(df):
                 else:
                     continue
         elif isinstance(genre,str):
-            df.loc[i,'genre'] = genre_replace[genre]
+            if genre in genre_replace.keys():
+                df.loc[i,'genre'] = genre_replace[genre]
+            elif genre not in genre_replace.keys():
+                df.loc[i,'genre'] = None
                 
     return df
 
@@ -357,15 +360,23 @@ def get_similar_track_ids(input_track_df):
     '''
     IMPORTANT:THIS FUNCTION IS MEANT FOR ITERATION
     ----------------------------------------------
-    Takes in a pandas series of a single track
-    that contains track_id, and genre. Then queries
-    the db for all tracks in the same genre as the
-    input track. The cosine similarity is then 
-    calculated between the input track and all
+    Takes in a pandas dataframe for a single user.
+    Then queries the db for all tracks in the same 
+    genre as the input track. The cosine similarity 
+    is then calculated between the input track and all
     other tracks within the genre. The top two
     most similar track ids are returned in a list'''
     
     genres = input_track_df.loc[:,'genre'].unique()
+    
+    if None in genres:
+        q = f'''
+        SELECT a.*, b.genre 
+        FROM norm_tracks a
+        JOIN track_metadata b ON a.track_id = b.track_id;'''
+        all_tracks = run_query(q)
+    
+    genres.remove(None)
     
     if len(genres) > 1:
         q = f'''
@@ -386,14 +397,20 @@ def get_similar_track_ids(input_track_df):
     recs = []
     for i,row in input_track_df.iterrows():
         all_scores = {}
-        for j,record in genre_tracks[genre_tracks['genre']==input_track_df.loc[i,'genre']].iterrows():
-            track_id = record['track_id']
-            score = cos_sim(row[3:-1],record[3:-1])
-            all_scores[track_id] = score
+        if row['genre'] == None:
+            for j,record in all_tracks.iterrows():
+                track_id = record['track_id']
+                score = cos_sim(row[3:-1],record[3:-1])
+            most_similar = sorted(all_scores,key=all_scores.get,reverse=True)[1:3]
+            recs.extend(most_similar)
+        else:
+            for j,record in genre_tracks[genre_tracks['genre']==input_track_df.loc[i,'genre']].iterrows():
+                track_id = record['track_id']
+                score = cos_sim(row[3:-1],record[3:-1])
+                all_scores[track_id] = score
 
-        most_similar = sorted(all_scores,key=all_scores.get,reverse=True)[1:3]
-        recs.extend(most_similar)
-
+            most_similar = sorted(all_scores,key=all_scores.get,reverse=True)[1:3]
+            recs.extend(most_similar)
     return recs
 
 def get_feature_vector_array(id_list):
