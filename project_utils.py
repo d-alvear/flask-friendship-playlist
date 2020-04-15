@@ -55,59 +55,36 @@ def search_and_extract(track_query):
     artist = search['tracks']['items'][0]['artists'][0]['name']
     artist_id = search['tracks']['items'][0]['artists'][0]['id']
 
-    return track_id, preview_url, track_name, artist, artist_id
-
-def get_artist_genre(artist_id):
-    '''A function that takes in a Spotify artist id, calls the Spotify 
-    API, and returns the artist genres, as a list'''
     search = sp.artist(artist_id)
-    return search['genres']
+    genre_list = search['genres']
+
+    track_data = [track_id, preview_url, track_name, artist, artist_id, genre_list]
+
+    return track_data
+
     
-def extract_features(track_id):
+def extract_features(track_list):
     '''A function that takes in a spotify track id, requests the audio
     features using the 'audio_features' endpoint from the Spotify API,
     and returns the features as a dataframe'''
     track_id = str(track_id)
     features = sp.audio_features(track_id)
-	#     features[0].values()
-
-    spotify_features = pd.DataFrame(data=features[0].values(),index=features[0].keys())
-    spotify_features = spotify_features.transpose()
-    spotify_features.drop(['type','uri','track_href','analysis_url'],axis=1,inplace=True)
-
-    return spotify_features
+	return features
 
 #============================= Librosa Utils ==================================#
-def check_for_track_preview(url):
-    '''Given a url object, checks if the track has a
-        preview'''
-    if url == None:
-        return False
-    else:
-        return True
-
-def get_mp3(url,track_id):
+def get_mp3(track_dict):
     '''A function that takes an mp3 url, and writes it to the local
         directory "audio-files"'''
-    try:
-        doc = requests.get(url)
-        with open(f'/tmp/track_{track_id}.mp3', 'wb') as f:
-            f.write(doc.content)
-    except:
-        pass
-    
-    return (f'/tmp/track_{track_id}.mp3')
+    for track_id, values in track_dict.items():
+        try:
+            doc = requests.get(url)
+            with open(f'/tmp/track_{track_id}.wav', 'wb') as f:
+                f.write(doc.content)
+        except:
+            pass
+        
 
-    # try:
-    #     doc = requests.get(url)
-    #     f = open(f'/tmp/track_{track_id}.mp3', 'wb')
-    #     f.write(doc.content)
-    #     f.close()
-    #     return f
-    # except:
-    #     pass
-
-def librosa_pipeline(path,track_id):
+def librosa_pipeline(track_id_list):
     '''This function takes in a spotify track_id as a string
         and uploads the cooresponding mp3 preview from a local
         directory. The mp3 then goes through the feature
@@ -117,38 +94,41 @@ def librosa_pipeline(path,track_id):
         REQUIREMENTS:
         * MP3 file must be in the directory in the form below
         '''
+    features = []
+    for track_id in track_id_list:
+        path = f'audio-files/track_{track_id}.wav'
 
-    # track = f'audio-files/track_{track_id}.mp3'
+        d = {}
+        d['track_id'] = track_id
 
-    d = {}
-    d['track_id'] = track_id
+        #load mp3
+        y, sr = librosa.load(path, mono=True, duration=30)
 
-    #load mp3
-    y, sr = librosa.load(path, mono=True, duration=30)
+        #feature extraction
+        spec_cent = librosa.feature.spectral_centroid(y=y, sr=sr)
+        d['spectral_centroid'] = np.mean(spec_cent)
 
-    #feature extraction
-    spec_cent = librosa.feature.spectral_centroid(y=y, sr=sr)
-    d['spectral_centroid'] = np.mean(spec_cent)
+        spec_bw = librosa.feature.spectral_bandwidth(y=y, sr=sr)
+        d['spectral_bandwidth'] = np.mean(spec_bw)
 
-    spec_bw = librosa.feature.spectral_bandwidth(y=y, sr=sr)
-    d['spectral_bandwidth'] = np.mean(spec_bw)
+        rolloff = librosa.feature.spectral_rolloff(y=y, sr=sr)
+        d['rolloff'] = np.mean(rolloff)
 
-    rolloff = librosa.feature.spectral_rolloff(y=y, sr=sr)
-    d['rolloff'] = np.mean(rolloff)
+        zcr = librosa.feature.zero_crossing_rate(y)
+        d['zero_crossing_rate'] = np.mean(zcr)
 
-    zcr = librosa.feature.zero_crossing_rate(y)
-    d['zero_crossing_rate'] = np.mean(zcr)
+        mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=20)
+        for i,e in zip(range(1, 21),mfcc):
+                d[f'mfcc{i}'] = np.mean(e)
 
-    mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=20)
-    for i,e in zip(range(1, 21),mfcc):
-            d[f'mfcc{i}'] = np.mean(e)
+        chroma = ['C', 'C#', 'D','D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+        chroma_stft = librosa.feature.chroma_stft(y=y, sr=sr)
+        for c,p in zip(chroma,chroma_stft):
+            d[c] = np.mean(p)
+        
+        features.append(d)
 
-    chroma = ['C', 'C#', 'D','D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
-    chroma_stft = librosa.feature.chroma_stft(y=y, sr=sr)
-    for c,p in zip(chroma,chroma_stft):
-        d[c] = np.mean(p)
-
-    return d    
+    return features    
 
 #============================= General Utils ==================================#
 def check_query_format(query):
@@ -194,26 +174,6 @@ def sort_inputs(query):
             not_in_db.append(name + " " + artist)
     
     return (user_df, not_in_db)
-
-def parse_and_sort_inputs(user_a_query, user_b_query):
-    '''Takes in both user's input strings, and sets up a 
-    dictionary to keep track of each user's inputs and 
-    whether they are in the database or not. Calls the 
-    sort_inputs function to parse and sort query strings.
-    Returns the resulting dictionary'''
-
-    # combines the form input into a list for interation; dict to store tracks
-    users = [user_a_query, user_b_query]
-    initial_inputs = {'user_a':None,
-                    'user_b':None}
-
-    # for each set of tracks, I need to keep track which tracks are in/not in the DB
-    for key,user in zip(initial_inputs.keys(),users):   
-        in_db, not_in_db = sort_inputs(user)
-        initial_inputs[key] = [in_db, not_in_db]
-
-
-    return initial_inputs
 
 def cos_sim(a,b):
     '''Calculates the cosine similarity between two feature
@@ -261,41 +221,38 @@ def not_in_database(not_in_db):
     #search for a track and extract metadata from results
     metadata = {}
     for track in not_in_db:
-        track_id, preview_url, track_name, artist, artist_id = search_and_extract(track) #using the input track name as the query to search spotify
-        genres = get_artist_genre(artist_id)
-        metadata[track_id] = [preview_url,track_name,artist,artist_id,genres]
+        track_data = search_and_extract(track) #using the input track name as the query to search spotify
+        metadata[track_data[0]] = track_data[1:]
 
-    not_in_db_df = pd.DataFrame()
-    no_url = {}
-    for track_id in metadata.keys():
-        if metadata[track_id][0] == None:
-            no_url[track_id] = [metadata[track_id][1],metadata[track_id][2]]
-            continue
-        else:
-            pass
-        
-        spotify_features = extract_features(track_id)
-        path = get_mp3(metadata[track_id][0],track_id)
+    not_null = {track_id:properties for track_id,properties in metadata.items() if properties[0] != None}
+    no_url = {track_id:[properties[1],properties[2]] for track_id,properties in metadata.items() if properties[0] == None}
+   
+    spotify_features = extract_features(list(not_null.keys()))
+    get_mp3(not_null)
 
-        #use librosa to extract audio features
-        r = librosa_pipeline(path,track_id)
+    #use librosa to extract audio features
+    librosa_features = librosa_pipeline(list(not_null.keys()))
 
-        #turning dict into datframe
-        librosa_features = pd.DataFrame(r,index=[0])
+    #concatenating the two dfs so the feature vector will be in the same format as the db
+    all_features = pd.DataFrame(librosa_features).merge(pd.DataFrame(spotify_features),left_on='track_id',right_on='id')
+    all_features.drop(['id','duration_ms','time_signature','mode','key','type','uri','track_href','analysis_url'],axis=1, inplace=True)
 
-        #concatenating the two dfs so the feature vector will be in the same format as the db
-        all_features = pd.concat([librosa_features,spotify_features],axis=1)
-        all_features.drop(['id','duration_ms','time_signature','mode','key'],axis=1, inplace=True)
+    #insert metadata into dataframe
+    for i,row in all_features.iterrows():
+        for k in metadata.keys():
+            if row['track_id'] == k:
+                all_features.loc[i,'track_name'] = metadata[k][1]
+                all_features.loc[i,'artist'] = metadata[k][2]
+                all_features.loc[i,'genre'] = metadata[k][4][0]
 
-        #insert metadata into dataframe
-        all_features.insert(1,'track_name',metadata[track_id][1])
-        all_features.insert(2,'artist',metadata[track_id][2])
-        all_features.insert(48,'genre',metadata[track_id][4][0])
-        
-        not_in_db_df = not_in_db_df.append(all_features)
-    
-    not_in_db_df = not_in_db_df.reset_index(drop=True)
-    return not_in_db_df, no_url
+    all_features = all_features[['track_id','track_name', 'artist', 'spectral_centroid', 'spectral_bandwidth', 'rolloff',
+                                'zero_crossing_rate', 'mfcc1', 'mfcc2', 'mfcc3', 'mfcc4', 'mfcc5',
+                                'mfcc6', 'mfcc7', 'mfcc8', 'mfcc9', 'mfcc10', 'mfcc11', 'mfcc12',
+                                'mfcc13', 'mfcc14', 'mfcc15', 'mfcc16', 'mfcc17', 'mfcc18', 'mfcc19',
+                                'mfcc20', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#',
+                                'B', 'danceability', 'energy', 'loudness', 'speechiness',
+                                'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo', 'genre']]
+    return all_features, no_url
 
 def scale_features(not_in_db_df):
     # min-max scaling
