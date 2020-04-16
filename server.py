@@ -26,7 +26,7 @@ conn = pg.connect(database=sql_credentials['database'],
 
 
 # Authenticate with Spotify using the Client Credentials flow
-client_credentials_manager = SpotifyClientCredentials(client_id=spotify_credentials['client_id'],
+client_credentials_manager = spotipy.SpotifyClientCredentials(client_id=spotify_credentials['client_id'],
 													  client_secret=spotify_credentials['client_secret'])
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
@@ -66,16 +66,16 @@ def friendship_app():
 
 
 	# Creating a df with the feature vectors of each user's input tracks
-	user_a_df, no_url_a = generate_user_df(user_a_df,user_a_to_get)
-	user_b_df, no_url_b = generate_user_df(user_b_df,user_b_to_get)
+	user_a_df = generate_user_df(user_a_df,user_a_to_get)
+	user_b_df = generate_user_df(user_b_df,user_b_to_get)
 
 	# # storing songs that couldn't be analyzed, separate loops because dicts could be different lengths
-	no_preview = {}
-	for k in no_url_a.keys():
-		no_preview[k] = no_url_a[k]
+	# no_preview = {}
+	# for k in no_url_a.keys():
+	# 	no_preview[k] = no_url_a[k]
 	
-	for l in no_url_b.keys():
-		no_preview[l] = no_url_b[l]
+	# for l in no_url_b.keys():
+	# 	no_preview[l] = no_url_b[l]
 
 	# Mapping generalized genres to df
 	user_a_df = remap_genres(user_a_df)
