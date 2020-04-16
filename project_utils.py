@@ -67,8 +67,7 @@ def extract_features(track_list):
 	'''A function that takes in a spotify track id, requests the audio
 	features using the 'audio_features' endpoint from the Spotify API,
 	and returns the features as a dataframe'''
-	track_id = str(track_id)
-	features = sp.audio_features(track_id)
+	features = sp.audio_features(track_list)
 	return features
 
 #============================= Librosa Utils ==================================#
