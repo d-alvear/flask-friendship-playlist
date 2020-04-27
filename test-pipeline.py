@@ -14,11 +14,12 @@ import requests
 from genre_replace import genre_replace
 import time
 import multiprocessing as mp
+import pickle
 
 # connect to spotify_db
 conn = pg.connect(database="spotify_db",
 				  user="postgres", 
-				  password="damara1004")
+				  password="")
 
 
 # Authenticate with Spotify using the Client Credentials flow
@@ -28,12 +29,12 @@ sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 ##====User A: pop, rock, classic rock
 ##====User B: classic rock, classic rock, hip hop
-query_a = "BFF, Kesha; teenagers, my chemical romance; you're so vain, carly simon"
-query_b = "ball and chain, janis joplin; fire and rain, james taylor; in my feelings, drake"
+# query_a = "BFF, Kesha; teenagers, my chemical romance; you're so vain, carly simon"
+# query_b = "ball and chain, janis joplin; fire and rain, james taylor; in my feelings, drake"
 # query_a = "bad and boujee, migos; god's plan, drake; fade, kanye west"
 # query_b = "once in a lifetime, talking heads; crazy on you, heart; ramble on, led zeppelin"
-# query_a = "never let you go, third eye blind; summer girl, haim; my song 5, haim"
-# query_b = "juice, lizzo; good as hell, lizzo; talia, king princess"
+query_a = "never let you go, third eye blind; summer girl, haim; my song 5, haim"
+query_b = "juice, lizzo; good as hell, lizzo; talia, king princess"
 # query_a="never let you go, third eye blind; summer girl, haim; my song 5, haim"
 # query_b="once in a lifetime, talking heads; never let you go, third eye blind; fade, kanye west"
 # query_a = "need your love, tennis; good bad times, hinds; automatic driver, la roux"
@@ -48,6 +49,11 @@ def friendship_app(query_a,query_b):
 	# 	return "Your query doesn't look quite right, make sure it looks like the example. It should include the name of the song, and the artist, separated by a comma."
 	# else:
 	# 	pass
+	start = time.time()
+	similarities = unpickle()
+	end = time.time()
+	print(f"Unpickle: {end-start}")
+	
 	start = time.time()
 	user_a_in_db, user_a_to_get = sort_inputs(query_a)
 	user_b_in_db, user_b_to_get = sort_inputs(query_b)
@@ -128,8 +134,8 @@ def friendship_app(query_a,query_b):
 	# user_b_ids = list(user_b_in_db['track_id'].values)
 	# Finding most similar songs to each user's input
 	start = time.time()
-	user_a_recs = get_similar_track_ids(user_a_df)
-	user_b_recs = get_similar_track_ids(user_b_df)
+	user_a_recs = get_similar_track_ids(user_a_df,user_a_in_db,similarities)
+	user_b_recs = get_similar_track_ids(user_b_df,user_b_in_db,similarities)
 	end = time.time()
 	print(f"Get Similar Track IDs: {end-start}")
 
@@ -172,7 +178,6 @@ if __name__ ==  '__main__':
 
 		# end_1 = time.time()
 		# print(f"Pool Map -- Total: {end_1 - start_1}")
-		# print(r)
 
 	
 		#===== TEST 2: REGULAR PROCESS =====# 
@@ -192,7 +197,7 @@ if __name__ ==  '__main__':
 
 		end_4 = time.time()
 		print(f"Pool ApplyAsync -- Total: {end_4 - start_4}")
-		# print(len(r))
+		print(r)
 
 		#===== TEST 5: POOL IMAP =====#
 		# start_5 = time.time()

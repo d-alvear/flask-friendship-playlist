@@ -11,6 +11,7 @@ import spotipy
 import requests
 from genre_replace import genre_replace
 from sklearn.metrics.pairwise import cosine_similarity
+import pickle
 
 client_credentials_manager = SpotifyClientCredentials(client_id=spotify_credentials['client_id'],client_secret=spotify_credentials['client_secret'])
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
@@ -37,6 +38,14 @@ def run_query(q):
 
 		except (Exception, pg.DatabaseError) as error:
 			print(error)
+
+def unpickle():
+	with open('precomputed_similarity.pkl','rb') as infile:
+		similarities = pickle.load(infile)
+	
+	return similarities
+
+
 #============================= Spotify Utils ==================================#
 def search_and_extract(track_query):
 	'''A function that takes in a song query and returns
@@ -125,8 +134,7 @@ def librosa_pipeline(track_id_list):
 	return features    
 
 def single_librosa_pipeline(track_id):
-	# print(f"started {track_id}"
-
+	
 	path = f'audio-files/track_{track_id}.wav'
 
 	d = {}
@@ -241,12 +249,21 @@ def gather_metadata(not_in_db):
 
 def get_spotify_features(metadata):
 	if metadata != None:
-		not_null = {track_id:properties for track_id,properties in metadata.items() if properties[0] != None}
+		not_null = {}
+		for track_id, properties in metadata.items():
+			if properties[0] != None:
+				not_null[track_id] = properties
+			else:
+				continue
+		# not_null = {track_id:properties for track_id,properties in metadata.items() if properties[0] != None}
 		# no_url = {track_id:[properties[1],properties[2]] for track_id,properties in metadata.items() if properties[0] == None}
+		if len(not_null) > 0:
+			spotify_features = extract_features(list(not_null.keys()))
+			get_mp3(not_null)
+			return not_null, spotify_features
+		elif len(not_null) == 0:
+			return None, None
 	
-		spotify_features = extract_features(list(not_null.keys()))
-		get_mp3(not_null)
-		return not_null, spotify_features
 	else:
 		return None, None
 
@@ -377,18 +394,26 @@ def generate_user_df(user_input_df, all_features_df):
 
 	return user_df
 
-def get_similar_track_ids(input_track_df):
+def get_similar_track_ids(input_track_df, in_df, similarities):
 	'''
 	IMPORTANT:THIS FUNCTION IS MEANT FOR ITERATION
 	----------------------------------------------
-	Takes in a pandas dataframe for a single user.
-	Then queries the db for all tracks in the same 
-	genre as the input track. The cosine similarity 
-	is then calculated between the input track and all
+	Takes in a pandas series of a single track
+	that contains track_id, and genre. Then queries
+	the db for all tracks in the same genre as the
+	input track. The cosine similarity is then 
+	calculated between the input track and all
 	other tracks within the genre. The top two
 	most similar track ids are returned in a list'''
+	if in_df.empty == False:
+		track_ids = list(in_df.loc[:,'track_id'])
+		not_in_db = input_track_df[~input_track_df['track_id'].isin(track_ids)]
+		in_db = input_track_df[input_track_df['track_id'].isin(track_ids)]
+	else:
+		not_in_db = input_track_df
+		in_db = None
 	
-	genres = input_track_df.loc[:,'genre'].unique()
+	genres = not_in_db.loc[:,'genre'].unique()
 	
 	if None in genres:
 		q = f'''
@@ -413,6 +438,7 @@ def get_similar_track_ids(input_track_df):
 		JOIN track_metadata b ON a.track_id = b.track_id
 		WHERE b.genre IN {tuple(genres)};'''
 		genre_tracks = run_query(q)
+		genre_tracks.set_index('track_id',inplace=True)
 
 	elif len(genres) == 1:
 		q = f'''
@@ -421,21 +447,29 @@ def get_similar_track_ids(input_track_df):
 		JOIN track_metadata b ON a.track_id = b.track_id
 		WHERE b.genre = '{genres[0]}';'''
 		genre_tracks = run_query(q)
-	genre_tracks.set_index('track_id',inplace=True)
-
-	recs = []
-	for i,row in input_track_df.iterrows():
-		if row['genre'] == None:
-			matrix = all_tracks.apply(lambda x: cos_sim(x[2:-1], row[3:-1]),axis=1,result_type='reduce')
-			tracks = matrix.sort_values(ascending=False)[1:3].index
-			recs.extend(list(tracks))
-
-		else:
-			g = genre_tracks[genre_tracks['genre'] == row['genre']]
-			matrix = g.apply(lambda x: cos_sim(x[2:-1], row[3:-1]),axis=1,result_type='reduce')
-			tracks = matrix.sort_values(ascending=False)[1:3].index
-			recs.extend(list(tracks))
+		genre_tracks.set_index('track_id',inplace=True)
 	
+	# for tracks that aren't already in the database
+	recs = []
+	if not_in_db.empty == False:
+		for i,row in not_in_db.iterrows():
+			if row['genre'] == None:
+				matrix = all_tracks.apply(lambda x: cos_sim(x[2:-1], row[3:-1]),axis=1,result_type='reduce')
+				tracks = matrix.sort_values(ascending=False)[1:3].index
+				recs.extend(list(tracks))
+
+			else:
+				g = genre_tracks[genre_tracks['genre'] == row['genre']]
+				matrix = g.apply(lambda x: cos_sim(x[2:-1], row[3:-1]),axis=1,result_type='reduce')
+				tracks = matrix.sort_values(ascending=False)[1:3].index
+				recs.extend(list(tracks))
+	
+	if in_db is not None:
+		for i,row in in_db.iterrows():
+			genre = row['genre']
+			track_id = row['track_id']
+			tracks = similarities[genre][track_id].sort_values(ascending=False)[1:3].index
+			recs.extend(list(tracks))
 	return recs
 
 def get_feature_vector_array(id_list):

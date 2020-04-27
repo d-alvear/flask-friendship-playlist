@@ -13,7 +13,7 @@ from psycopg2 import Error
 import librosa
 import spotipy
 import requests
-import multiprocessing as mp
+from multiprocessing import Pool
 
 # connect to spotify_db
 # conn = pg.connect(database=sql_credentials['database'],
@@ -33,6 +33,7 @@ sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 
 app = Flask(__name__, static_folder='static', template_folder='views')
+pool = Pool(processes=4)
 
 @app.route('/')
 def authenticate_user():
@@ -49,6 +50,8 @@ def homepage():
 
 @app.route('/results', methods=['POST','GET'])
 def friendship_app():
+	similarities = unpickle()
+	
 	query_a = request.form['query_a']
 	query_b = request.form['query_b']
 
@@ -96,8 +99,8 @@ def friendship_app():
 	user_b_df = remap_genres(user_b_df)
 	
 	# # Finding most similar songs to each user's input
-	user_a_recs = get_similar_track_ids(user_a_df)
-	user_b_recs = get_similar_track_ids(user_b_df)
+	user_a_recs = get_similar_track_ids(user_a_df,user_a_in_db,similarities)
+	user_b_recs = get_similar_track_ids(user_b_df,user_b_in_db,similarities)
 
 	user_a_index, user_a_array = get_feature_vector_array(user_a_recs)
 		
@@ -123,6 +126,4 @@ def friendship_app():
 							titles=[recommendations.columns.values])
 
 if __name__ == '__main__':
-	with mp.Pool(processes=4) as pool:
-		app.run()
-	
+	app.run()
