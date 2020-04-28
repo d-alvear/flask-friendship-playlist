@@ -17,15 +17,15 @@ client_credentials_manager = SpotifyClientCredentials(client_id=spotify_credenti
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 #=============================== SQL Utils ====================================#
-# conn = pg.connect(database=sql_credentials['database'],
-# 				  user=sql_credentials['user'], 
-# 				  password=sql_credentials['password'],
-# 				  host =sql_credentials['host'])
+conn = pg.connect(database=sql_credentials['database'],
+				  user=sql_credentials['user'], 
+				  password=sql_credentials['password'],
+				  host=sql_credentials['host'])
 
 
-conn = pg.connect(database="spotify_db",
-				  user="postgres", 
-				  password="damara1004")
+# conn = pg.connect(database="spotify_db",
+# 				  user="postgres", 
+# 				  password="")
 
 def run_query(q):
 	'''a function that takes a SQL query as an argument
