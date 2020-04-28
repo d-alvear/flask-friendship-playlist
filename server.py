@@ -16,14 +16,14 @@ import requests
 from multiprocessing import Pool
 
 # connect to spotify_db
-# conn = pg.connect(database=sql_credentials['database'],
-#                   user=sql_credentials['user'], 
-#                   password=sql_credentials['password'],
-#                   host =sql_credentials['host'])
+conn = pg.connect(database=sql_credentials['database'],
+                  user=sql_credentials['user'], 
+                  password=sql_credentials['password'],
+                  host=sql_credentials['host'])
 
-conn = pg.connect(database="spotify_db",
-				  user="postgres", 
-				  password="damara1004")
+# conn = pg.connect(database="spotify_db",
+# 				  user="postgres", 
+# 				  password="damara1004")
 
 
 # Authenticate with Spotify using the Client Credentials flow
