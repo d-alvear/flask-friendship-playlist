@@ -23,7 +23,7 @@ conn = pg.connect(database=sql_credentials['database'],
 
 # conn = pg.connect(database="spotify_db",
 # 				  user="postgres", 
-# 				  password="damara1004")
+# 				  password=)
 
 
 # Authenticate with Spotify using the Client Credentials flow

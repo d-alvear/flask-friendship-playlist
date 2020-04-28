@@ -25,7 +25,7 @@ conn = pg.connect(database=sql_credentials['database'],
 
 # conn = pg.connect(database="spotify_db",
 # 				  user="postgres", 
-# 				  password="damara1004")
+# 				  password="")
 
 def run_query(q):
 	'''a function that takes a SQL query as an argument
