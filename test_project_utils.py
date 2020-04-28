@@ -11,11 +11,16 @@ import spotipy
 import requests
 from genre_replace import genre_replace
 from sklearn.metrics.pairwise import cosine_similarity
-import time
-import multiprocessing as mp
+import pickle
 
 client_credentials_manager = SpotifyClientCredentials(client_id=spotify_credentials['client_id'],client_secret=spotify_credentials['client_secret'])
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+
+#=============================== SQL Utils ====================================#
+# conn = pg.connect(database=sql_credentials['database'],
+# 				  user=sql_credentials['user'], 
+# 				  password=sql_credentials['password'],
+# 				  host =sql_credentials['host'])
 
 
 conn = pg.connect(database="spotify_db",
@@ -33,6 +38,13 @@ def run_query(q):
 
 		except (Exception, pg.DatabaseError) as error:
 			print(error)
+
+def unpickle():
+	with open('precomputed_similarity.pkl','rb') as infile:
+		similarities = pickle.load(infile)
+	
+	return similarities
+
 
 #============================= Spotify Utils ==================================#
 def search_and_extract(track_query):
@@ -57,31 +69,24 @@ def search_and_extract(track_query):
 
 	return track_data
 
-# def get_artist_genre(artist_id):
-#     '''A function that takes in a Spotify artist id, calls the Spotify 
-#     API, and returns the artist genres, as a list'''
-#     search = sp.artist(artist_id)
-#     return search['genres']
-	
 def extract_features(track_list):
 	'''A function that takes in a spotify track id, requests the audio
 	features using the 'audio_features' endpoint from the Spotify API,
 	and returns the features as a dataframe'''
 	features = sp.audio_features(track_list)
 	return features
-
 #============================= Librosa Utils ==================================#
 def get_mp3(track_dict):
-	'''A function that takes a .wav url, and writes it to the local
+	'''A function that takes an mp3 url, and writes it to the local
 		directory "audio-files"'''
 	for track_id, values in track_dict.items():
 		try:
-			doc = requests.get(values[0])
-			with open(f'audio-files/track_{track_id}.wav', 'wb') as f:
+			doc = requests.get(url)
+			with open(f'/tmp/track_{track_id}.wav', 'wb') as f:
 				f.write(doc.content)
 		except:
 			pass
-
+		
 def librosa_pipeline(track_id_list):
 	'''This function takes in a spotify track_id as a string
 		and uploads the cooresponding mp3 preview from a local
@@ -92,9 +97,7 @@ def librosa_pipeline(track_id_list):
 		REQUIREMENTS:
 		* MP3 file must be in the directory in the form below
 		'''
-	print(f"started {track_id_list}")
 	features = []
-
 	for track_id in track_id_list:
 		path = f'audio-files/track_{track_id}.wav'
 
@@ -127,12 +130,11 @@ def librosa_pipeline(track_id_list):
 			d[c] = np.mean(p)
 		
 		features.append(d)
-	print(f"ended {track_id_list}")
+
 	return features    
 
 def single_librosa_pipeline(track_id):
-	# print(f"started {track_id}"
-
+	
 	path = f'audio-files/track_{track_id}.wav'
 
 	d = {}
@@ -164,7 +166,7 @@ def single_librosa_pipeline(track_id):
 		d[c] = np.mean(p)
 		
 	# print(f"ended {track_id}")
-	return d    
+	return d
 #============================= General Utils ==================================#
 def check_query_format(query):
 	query = query[:-1] if query.endswith(';') else query
@@ -217,6 +219,7 @@ def cos_sim(a,b):
 	l = (np.linalg.norm(a))*(np.linalg.norm(b))
 	return d/l
 
+
 # # for creating a spotify playlist from track_uris
 # def create_playlist(sp, recommended_tracks):
 #     user_all_data = sp.current_user()
@@ -231,6 +234,7 @@ def cos_sim(a,b):
 #     # 	print("could not add tracks")
 
 #     return playlist_uri
+
 #================================ NOT IN DATABASE =============================#
 def gather_metadata(not_in_db):
 	#search for a track and extract metadata from results
@@ -245,17 +249,23 @@ def gather_metadata(not_in_db):
 
 def get_spotify_features(metadata):
 	if metadata != None:
-		not_null = {track_id:properties for track_id,properties in metadata.items() if properties[0] != None}
+		not_null = {}
+		for track_id, properties in metadata.items():
+			if properties[0] != None:
+				not_null[track_id] = properties
+			else:
+				continue
+		# not_null = {track_id:properties for track_id,properties in metadata.items() if properties[0] != None}
 		# no_url = {track_id:[properties[1],properties[2]] for track_id,properties in metadata.items() if properties[0] == None}
+		if len(not_null) > 0:
+			spotify_features = extract_features(list(not_null.keys()))
+			get_mp3(not_null)
+			return not_null, spotify_features
+		elif len(not_null) == 0:
+			return None, None
 	
-		spotify_features = extract_features(list(not_null.keys()))
-		get_mp3(not_null)
-		return not_null, spotify_features
 	else:
 		return None, None
-
-	#use librosa to extract audio features
-	# librosa_features = librosa_pipeline(list(not_null.keys()))
 
 def combine_all_features(metadata, librosa_features, spotify_features):
 	# concatenating the two dfs so the feature vector will be in the same format as the db
@@ -281,14 +291,46 @@ def combine_all_features(metadata, librosa_features, spotify_features):
 		return all_features
 
 	else:
-		return pd.DataFrame()
+		return pd.DataFrame()	
+
+# def not_in_database(not_in_db):
+# 	#search for a track and extract metadata from results
+# 	metadata = {}
+# 	for track in not_in_db:
+# 		track_data = search_and_extract(track) #using the input track name as the query to search spotify
+# 		metadata[track_data[0]] = track_data[1:]
+
+# 	not_null = {track_id:properties for track_id,properties in metadata.items() if properties[0] != None}
+# 	no_url = {track_id:[properties[1],properties[2]] for track_id,properties in metadata.items() if properties[0] == None}
+   
+# 	spotify_features = extract_features(list(not_null.keys()))
+# 	get_mp3(not_null)
+
+# 	#use librosa to extract audio features
+# 	librosa_features = librosa_pipeline(list(not_null.keys()))
+
+# 	#concatenating the two dfs so the feature vector will be in the same format as the db
+# 	all_features = pd.DataFrame(librosa_features).merge(pd.DataFrame(spotify_features),left_on='track_id',right_on='id')
+# 	all_features.drop(['id','duration_ms','time_signature','mode','key','type','uri','track_href','analysis_url'],axis=1, inplace=True)
+
+# 	#insert metadata into dataframe
+# 	for i,row in all_features.iterrows():
+# 		for k in metadata.keys():
+# 			if row['track_id'] == k:
+# 				all_features.loc[i,'track_name'] = metadata[k][1]
+# 				all_features.loc[i,'artist'] = metadata[k][2]
+# 				all_features.loc[i,'genre'] = metadata[k][4][0]
+
+# 	all_features = all_features[['track_id','track_name', 'artist', 'spectral_centroid', 'spectral_bandwidth', 'rolloff',
+# 								'zero_crossing_rate', 'mfcc1', 'mfcc2', 'mfcc3', 'mfcc4', 'mfcc5',
+# 								'mfcc6', 'mfcc7', 'mfcc8', 'mfcc9', 'mfcc10', 'mfcc11', 'mfcc12',
+# 								'mfcc13', 'mfcc14', 'mfcc15', 'mfcc16', 'mfcc17', 'mfcc18', 'mfcc19',
+# 								'mfcc20', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#',
+# 								'B', 'danceability', 'energy', 'loudness', 'speechiness',
+# 								'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo', 'genre']]
+# 	return all_features
 
 def scale_features(not_in_db_df):
-	# min-max scaling
-	#querying for the database
-	# q = '''SELECT * FROM raw_tracks'''
-
-	# database = run_query(q)
 	fv = not_in_db_df.drop(['track_id','track_name','artist','genre'],axis=1)
 
 	db_min = pd.DataFrame([168.8868, 227.2588, 263.5151, 0.0024, -806.8402, 5.6723, -94.7838, -37.9753, 
@@ -307,22 +349,6 @@ def scale_features(not_in_db_df):
 
 	combined = pd.concat([fv, db_min, db_max], ignore_index=True)
 	scaled = ((combined - combined.min())/(combined.max()-combined.min()))
-
-	
-	# i = len(database)
-
-	
-
-
-	# numerator = [i - j for i,j in zip(list(fv.values),db_min)]
-
-	# scaled = ((fv - db_min)/(db_max - db_min))
-
-	#append feature vector to bottom of the db
-	# database = pd.concat([database.iloc[:,1:],fv.iloc[:,1:]],ignore_index=True)
-
-	#apply a lambda function that does min-max normalization on the db
-	# database = fv.apply(lambda x: ((x - db_min)/(db_max - db_min)),axis=1)
 	
 	#overwrite features vector df
 	i = len(fv)
@@ -355,7 +381,7 @@ def generate_user_df(user_input_df, all_features_df):
 	user dataframes needed to make recommendations. It
 	also stores the songs that could not be analyzed in the
 	no_url dictionary'''
-	
+		
 	if (user_input_df.empty == False) & (all_features_df.empty == False):
 		scaled = scale_features(all_features_df)
 		user_df = pd.concat([user_input_df,scaled],ignore_index=True)
@@ -368,7 +394,7 @@ def generate_user_df(user_input_df, all_features_df):
 
 	return user_df
 
-def get_similar_track_ids(input_track_df):
+def get_similar_track_ids(input_track_df, in_df, similarities):
 	'''
 	IMPORTANT:THIS FUNCTION IS MEANT FOR ITERATION
 	----------------------------------------------
@@ -379,9 +405,15 @@ def get_similar_track_ids(input_track_df):
 	calculated between the input track and all
 	other tracks within the genre. The top two
 	most similar track ids are returned in a list'''
-	start = time.time()
-	# to_get = input_track_df[~input_track_df['track_id'].isin(track_ids)]
-	genres = input_track_df.loc[:,'genre'].unique()
+	if in_df.empty == False:
+		track_ids = list(in_df.loc[:,'track_id'])
+		not_in_db = input_track_df[~input_track_df['track_id'].isin(track_ids)]
+		in_db = input_track_df[input_track_df['track_id'].isin(track_ids)]
+	else:
+		not_in_db = input_track_df
+		in_db = None
+	
+	genres = not_in_db.loc[:,'genre'].unique()
 	
 	if None in genres:
 		q = f'''
@@ -406,6 +438,7 @@ def get_similar_track_ids(input_track_df):
 		JOIN track_metadata b ON a.track_id = b.track_id
 		WHERE b.genre IN {tuple(genres)};'''
 		genre_tracks = run_query(q)
+		genre_tracks.set_index('track_id',inplace=True)
 
 	elif len(genres) == 1:
 		q = f'''
@@ -414,45 +447,29 @@ def get_similar_track_ids(input_track_df):
 		JOIN track_metadata b ON a.track_id = b.track_id
 		WHERE b.genre = '{genres[0]}';'''
 		genre_tracks = run_query(q)
-	genre_tracks.set_index('track_id',inplace=True)
-	end = time.time()
-	print(f"---Getting Genres: {end-start}")
+		genre_tracks.set_index('track_id',inplace=True)
 	
-
-	start = time.time()
-	# recs = []
-	# for i,row in input_track_df.iterrows():
-	#     all_scores = {}
-	#     if row['genre'] == None:
-	#         for j,record in all_tracks.iterrows():
-	#             track_id = record['track_id']
-	#             score = cos_sim(row[3:-1],record[3:-1])
-	#         most_similar = sorted(all_scores,key=all_scores.get,reverse=True)[1:3]
-	#         recs.extend(most_similar)
-	#     else:
-	#         for j,record in genre_tracks[genre_tracks['genre']==input_track_df.loc[i,'genre']].iterrows():
-	#             track_id = record['track_id']
-	#             score = cos_sim(row[3:-1],record[3:-1])
-	#             all_scores[track_id] = score
-	#         most_similar = sorted(all_scores,key=all_scores.get,reverse=True)[1:3]
-	#         recs.extend(most_similar)
-
+	# for tracks that aren't already in the database
 	recs = []
-	for i,row in input_track_df.iterrows():
-		if row['genre'] == None:
-			matrix = all_tracks.apply(lambda x: cos_sim(x[2:-1], row[3:-1]),axis=1,result_type='reduce')
-			tracks = matrix.sort_values(ascending=False)[1:3].index
-			recs.extend(list(tracks))
+	if not_in_db.empty == False:
+		for i,row in not_in_db.iterrows():
+			if row['genre'] == None:
+				matrix = all_tracks.apply(lambda x: cos_sim(x[2:-1], row[3:-1]),axis=1,result_type='reduce')
+				tracks = matrix.sort_values(ascending=False)[1:3].index
+				recs.extend(list(tracks))
 
-		else:
-			g = genre_tracks[genre_tracks['genre'] == row['genre']]
-			matrix = g.apply(lambda x: cos_sim(x[2:-1], row[3:-1]),axis=1,result_type='reduce')
-			tracks = matrix.sort_values(ascending=False)[1:3].index
-			recs.extend(list(tracks))
+			else:
+				g = genre_tracks[genre_tracks['genre'] == row['genre']]
+				matrix = g.apply(lambda x: cos_sim(x[2:-1], row[3:-1]),axis=1,result_type='reduce')
+				tracks = matrix.sort_values(ascending=False)[1:3].index
+				recs.extend(list(tracks))
 	
-
-	end = time.time()
-	print(f"---Calculating Scores: {end-start}")
+	if in_db is not None:
+		for i,row in in_db.iterrows():
+			genre = row['genre']
+			track_id = row['track_id']
+			tracks = similarities[genre][track_id].sort_values(ascending=False)[1:3].index
+			recs.extend(list(tracks))
 	return recs
 
 def get_feature_vector_array(id_list):
@@ -490,7 +507,6 @@ def create_similarity_matrix(user_a_array, user_a_index, user_b_array, user_b_in
 	return cosine_df
 
 def get_combined_recommendations(cosine_df):
-
 	'''Takes in the cosine similarity dataframe as an
 	input, then finds the pairs of track that have 
 	the top 3 similarity scores. Queries the db
@@ -545,5 +561,3 @@ def parse_result(not_null_a, not_null_b, result_object):
 		librosa_features_a = result[:i]
 		librosa_features_b = result[-j:]
 		return librosa_features_a, librosa_features_b
-
-	
