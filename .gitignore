@@ -1,3 +1,9 @@
 *.env
 secret.py
 *.ipynb
+*.sql
+*.pkl
+runtimes.txt
+test_project_utils.py
+test-pipeline.py
+test.py

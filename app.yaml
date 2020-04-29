@@ -1,6 +1,6 @@
 runtime: python37
 instance_class: F2
-entrypoint: gunicorn -b server:app -w 3 -t 90 --log-file -
+entrypoint: gunicorn -b server:app -w 4 -t 90 --log-file -
 handlers:
   # This configures Google App Engine to serve the files in the app's static
   # directory.

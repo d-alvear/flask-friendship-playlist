@@ -12,6 +12,12 @@
 # below:
 .git
 .gitignore
+.sql
+.pkl
+runtimes.txt
+test_project_utils.py
+test-pipeline.py
+test.py
 
 # Python pycache:
 __pycache__/
