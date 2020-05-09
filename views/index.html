@@ -1,19 +1,11 @@
 <!-- This is a static file -->
 <!-- served from your routes in server.js -->
+{% extends "base.html" %}
 
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Friendship Playlist</title>
-    <meta name="description" content="A cool thing made with Glitch">
-    <link id="favicon" rel="icon" href="https://gomix.com/favicon-app.ico" type="image/x-icon">
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://sp-bootstrap.global.ssl.fastly.net/8.0.0/sp-bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/static/style.css">
-  </head>
+
+{% block content %}
   <body>
+    <div class="body-container">
     <header>
       <h1>
         Friendship Playlist
@@ -25,27 +17,29 @@
     <main>
       <p>Input songs using the following format, using semicolons between songs:<br>
       <i>Bohemian Rhapsody, Queen; Heartbreak Hotel, Elvis; Toxic, Britney Spears</i></p>
-      <form method="POST" action='results' >
-        <input name ="query_a" required type="text" maxlength="8000" placeholder="Friend 1" style="height: 30px; width: 500px;">
-      <p></p>
+      <p>
+        <form>
+           <label>Or Try a Demo: </label><br>
+           <input type="radio" name="input3" value="popVsRock" onchange="autoFill(value)">Pop vs. Rock
+           <input type="radio" name="input3" value="rockVsHiphop" onchange="autoFill(value)">Rock vs. Hip Hop
+           <input type="radio" name="input3" value="mixedGenres" onchange="autoFill(value)">Mixed Genres<br>
+        </form><br>
+      
         <form method="POST" action='results' >
-         <input name ="query_b" required type="text" maxlength="8000" placeholder="Friend 2" style="height: 30px; width: 500px;">
-      <p></p>
-         <span class="input-group-btn">
-            <button class="btn btn-powder-green" onclick="window.location.href='{{playlist}}'" type="submit">Submit</button>
-        </div>
-      </form>
+          <input name ="query_a" required type="text" maxlength="8000" placeholder="Friend 1" style="height: 30px; width: 500px;">
+          <p></p>
+          <form method="POST" action='results' >
+          <input name ="query_b" required type="text" maxlength="8000" placeholder="Friend 2" style="height: 30px; width: 500px;">
+          <p></p>
+          <span class="input-group-btn">
+          <button class="btn btn-powder-green" onclick="window.location.href='{{playlist}}'" type="submit">Submit</button>
+          </div>
+        </form>
       <!-- <section class="results">
         <h3>Result</h3>
 
       </section> -->
     </main>
-
-<!--      Your web-app is https, so your scripts need to be too -->
-    <!-- <script src="https://code.jquery.com/jquery-2.2.1.min.js"
-            integrity="sha256-gvQgAFzTH6trSrAWoH1iPo9Xc96QxSZ3feW6kem+O00="
-            crossorigin="anonymous"></script>
-    <script src="/client.js"></script> -->
-
+  </div>
   </body>
-</html>
+{% endblock %}

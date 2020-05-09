@@ -1,22 +1,13 @@
 <!-- This is a static file -->
 <!-- served from your routes in server.js -->
 
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Friendship Playlist</title>
-    <meta name="description" content="A cool thing made with Glitch">
-    <link id="favicon" rel="icon" href="https://gomix.com/favicon-app.ico" type="image/x-icon">
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://sp-bootstrap.global.ssl.fastly.net/8.0.0/sp-bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/static/style.css">
-  </head>
+{% extends "base.html" %}
+
+
+{% block content %}
   <body>
-      <h1>Friendship Playlist</h1>
       <section class="results">
-        <h2>Your Friendship Playlist</h2>
+        <h2>Your Playlist</h2>
         <div>
         <span>
           {% for table in tables %}
@@ -30,7 +21,7 @@
         </span> -->
         </div>
       </section>
-    </main>
+    </body>
 
 <!--      Your web-app is https, so your scripts need to be too -->
     <!-- <script src="https://code.jquery.com/jquery-2.2.1.min.js"
@@ -38,5 +29,5 @@
             crossorigin="anonymous"></script>
     <script src="/client.js"></script> -->
 
-  </body>
-</html>
+
+{% endblock %}

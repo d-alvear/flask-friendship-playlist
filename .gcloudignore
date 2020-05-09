@@ -18,6 +18,13 @@ runtimes.txt
 test_project_utils.py
 test-pipeline.py
 test.py
+README.md
+.json
+index_demo.html
+.wav
+genre_counts.py
+.ipynb
+cloud-credentials.json
 
 # Python pycache:
 __pycache__/
