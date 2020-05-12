@@ -1,0 +1,106 @@
+<!-- This is a static file -->
+<!-- served from your routes in server.js -->
+
+{% extends "base.html" %}
+
+{% block content %}
+<body>
+<div class="body-container">
+<header>
+<h1>Demo Cases</h1>
+</header>
+<main>
+    <h3>Demo 1: Pop vs. Rock</h3>
+    <span class="inline-container">
+        <h4 class="left-user-header user-header">Pop Songs:</h4>
+        <ul class="user-list" style="width: 340px;">
+            <li>Bad Romance, Lady Gaga</li>
+            <li>Fantasy, Mariah Carey</li>
+            <li>Cry Me a River, Justin Timberlake</li>
+        </ul>
+        <h4 class="right-user-header user-header">Rock Songs:</h4>
+        <ul class="user-list" style="width: 340px;">
+            <li>Smells Like Teen Spirit, Nirvana</li>
+            <li>Island In the Sun, Weezer</li>
+            <li>Never Let You Go, Third Eye Blind</li>
+        </ul>
+        <h4 class="right-user-header user-header">Results:</h4>
+        <ul class="user-list" style="width: 340px;">
+            <li>Smells Like Teen Spirit, Nirvana</li>
+            <li>Island In the Sun, Weezer</li>
+            <li>Never Let You Go, Third Eye Blind</li>
+        </ul>
+    </span>
+    <h4>Interpretation</h4>
+    <p>This grouped violin plot compares how the values of danceability, energy, and tempo are distributed
+        among the pop and rock songs selected for this demo and the resulting songs picked by Friendshipify.
+        The value where the violin is the widest, represents a higher probability that all songs in the given 
+        genre will take on that value. Values where the violin is skinniest represents a lower probability of songs
+        in the genre taking on that value.
+
+        The leftmost violin group shows the distribution of danceability values among the 
+        two genres and the resulting songs. Pop songs (purple) 
+    </p>
+    <span>
+        {{ div_placeholder_1 }}
+    </span>
+    <br></br>
+
+    <h3>Demo 2: Rock vs. Hip Hop</h3>
+    <span class="inline-container">
+        <h4 class="left-user-header user-header">Rock Songs:</h4>
+        <ul class="user-list" style="width: 340px;">
+            <li>The Middle, Jimmy Eat World</li>
+            <li>Mr. Brightside, The Killers</li>
+            <li>Californication, Red Hot Chili Peppers</li>
+        </ul>
+        <h4 class="right-user-header user-header">Hip Hop Songs:</h4>
+        <ul class="user-list" style="width: 340px;">
+            <li>Hey Ya, OutKast</li>
+            <li>In My Feelings, Drake</li>
+            <li>Waterfalls, TLC</li>
+        </ul>
+        <h4 class="right-user-header user-header">Results:</h4>
+        <ul class="user-list" style="width: 340px;">
+            <li>Hey Ya, OutKast</li>
+            <li>In My Feelings, Drake</li>
+            <li>Waterfalls, TLC</li>
+        </ul>
+    </span>
+    <h4>Interpretation</h4>
+    <span>
+        {{ div_placeholder_2 }}
+    </span>
+    <br></br>
+    <h3>Demo 3: Mixed Genres</h3>
+    <span class="inline-container">
+        <h4 class="left-user-header user-header">Pop, Disco, Rock Songs:</h4>
+        <ul class="user-list" style="width: 340px;">
+            <li>Call Me Maybe, Carly Rae Jepsen</li>
+            <li>Dancing Queen, ABBA</li>
+            <li>All The Small Things, blink-182</li>
+        </ul>
+        <h4 class="right-user-header user-header">Indie, Funk, Classic Rock Songs:</h4>
+        <ul class="user-list" style="width: 340px;">
+            <li>Electric Feel, MGMT</li>
+            <li>Got To Give It Up, Marvin Gaye</li>
+            <li>Hotel California, Eagles</li>
+        </ul>
+    </span>
+    <span class="inline-container">
+        <h4 class="right-user-header user-header">Results:</h4>
+        <ul class="user-list" style="width: 340px;">
+            <li>Electric Feel, MGMT</li>
+            <li>Got To Give It Up, Marvin Gaye</li>
+            <li>Hotel California, Eagles</li>
+        </ul>
+    </span>
+    <h4>Interpretation</h4>
+    <span>
+        {{ div_placeholder_3 }}
+    </span>
+
+</main>
+</div>
+</body>
+{% endblock %}

@@ -2,6 +2,7 @@ from secret import *
 import pandas as pd
 import numpy as np
 import psycopg2 as pg
+from psycopg2 import Error
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import librosa
@@ -9,6 +10,8 @@ import json
 import requests
 from genre_replace import genre_replace
 from sklearn.metrics.pairwise import cosine_similarity
+from plotly.offline import plot
+import plotly.graph_objs as go
 
 client_credentials_manager = SpotifyClientCredentials(client_id=spotify_credentials['client_id'],client_secret=spotify_credentials['client_secret'])
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
@@ -33,7 +36,6 @@ def run_query(q):
 			print(error)
 		finally:
 			pass
-
 #============================= Spotify Utils ==================================#
 def search_and_extract(track_query):
 	'''A function that takes in a song query and returns
@@ -193,7 +195,6 @@ def cos_sim(a,b):
 	d = np.dot(a, b)
 	l = (np.linalg.norm(a))*(np.linalg.norm(b))
 	return d/l
-
 #================================ NOT IN DATABASE =============================#
 def gather_metadata(not_in_db):
 	#search for a track and extract metadata from results
@@ -305,7 +306,6 @@ def remap_genres(df):
 				df.loc[i,'genre'] = None
 				
 	return df
-
 #============================= Combining Steps ================================#
 def generate_user_df(user_input_df, all_features_df):
 	'''MUST BE CALLED ON EACH USER KEY SEPARATELY
@@ -458,8 +458,11 @@ def get_combined_recommendations(cosine_df):
 	ids = set(ids)
 
 	q = f'''
-	SELECT track_name, artist, genre FROM track_metadata
-	WHERE track_id IN {tuple(ids)};'''
+	SELECT a.*, b.genre 
+	FROM norm_tracks a 
+		JOIN track_metadata b 
+		ON a.track_id = b.track_id
+	WHERE a.track_id IN {tuple(ids)};'''
 	final = run_query(q)
 	return final
 
@@ -475,3 +478,132 @@ def not_in_database_pipeline(to_get,in_db):
 		user_df = remap_genres(user_df)
 
 		return user_df
+
+def format_dataframe(user_a_df,user_b_df,recommendations):
+	user_a_df.loc[:,'user'] = 'user a'
+	user_a_df = user_a_df[['danceability','energy','tempo','user']]
+
+	v = [user_a_df.loc[:,'danceability'].values, user_a_df.loc[:,'energy'].values , user_a_df.loc[:,'tempo'].values]
+	values = [item for sublist in v for item in sublist]
+
+	l = [[c]*3 for c in user_a_df.columns[:-1]]
+	labels = [item for sublist in l for item in sublist]
+
+	user_a_label = ['user a'] * 9
+
+	formatted_a = pd.DataFrame(data=[user_a_label, labels, values]).transpose()
+	formatted_a.columns = ['user','feature','value']
+
+	user_b_df.loc[:,'user'] = 'user b'
+	user_b_df = user_b_df[['danceability','energy','tempo','user']]
+
+	v = [user_b_df.loc[:,'danceability'].values, user_b_df.loc[:,'energy'].values , user_b_df.loc[:,'tempo'].values]
+	values = [item for sublist in v for item in sublist]
+
+	l = [[c]*3 for c in user_b_df.columns[:-1]]
+	labels = [item for sublist in l for item in sublist]
+
+	user_b_label = ['user b'] * 9
+
+	formatted_b = pd.DataFrame(data=[user_b_label, labels, values]).transpose()
+	formatted_b.columns = ['user','feature','value']
+
+	recommendations.loc[:,'user'] = 'result'
+	recommendations = recommendations[['danceability','energy','tempo','user']]
+
+	v = [recommendations.loc[:,'danceability'].values, recommendations.loc[:,'energy'].values , recommendations.loc[:,'tempo'].values]
+	values = [item for sublist in v for item in sublist]
+
+	l = [[c]*(len(recommendations)) for c in recommendations.columns[:-1]]
+	labels = [item for sublist in l for item in sublist]
+
+	result_label = ['result'] * (3*len(recommendations))
+
+	formatted_r = pd.DataFrame(data=[result_label, labels, values]).transpose()
+	formatted_r.columns = ['user','feature','value']
+
+
+	combined = pd.concat([formatted_a,formatted_b,formatted_r],ignore_index=True)
+	return combined
+
+def generate_plot(combined):
+	fig = go.Figure()
+	fig.add_trace(go.Violin(x=combined['feature'][combined['user']=='user a'],
+							y=combined['value'][combined['user']=='user a'],
+							name="Friend 1",
+							))
+
+	fig.add_trace(go.Violin(x=combined['feature'][combined['user']=='user b'],
+							y=combined['value'][combined['user']=='user b'],
+							name="Friend 2",
+							))
+
+	fig.add_trace(go.Violin(x=combined['feature'][combined['user']=='result'],
+							y=combined['value'][combined['user']=='result'],
+							name="Recommendations",
+							))
+
+	fig.update_traces(box_visible=True, meanline_visible=True)
+	fig.update_layout(title={
+                        'text': "Comparison of Audio Features",
+                        'y':0.9,
+                        'x':0.5,
+                        'xanchor': 'center',
+                        'yanchor': 'top'},
+                xaxis_title="Audio Features",
+                yaxis_title="Normalized Feauture Values",
+                violinmode='group',
+                font=dict(
+                        size=18),
+                autosize=False,
+                width=1000,
+                height=500,
+                margin=dict(
+                        l=50,
+                        r=50,
+                        b=100,
+                        t=100,
+                        pad=4
+                ))
+
+	return plot(fig,output_type='div')
+
+#======PLOT UTILS======#
+pop_rock = {'trace_1':{'x':['danceability', 'danceability', 'danceability', 'energy', 'energy', 'energy', 'tempo', 'tempo', 'tempo'],
+					   'y':[0.70948, 0.85321, 0.63609, 0.92092, 0.54755, 0.65265, 0.48739, 0.41979, 0.3026]},
+			'trace_2':{'x':['danceability', 'danceability', 'danceability', 'energy', 'energy', 'energy', 'tempo', 'tempo', 'tempo'],
+					   'y':[0.51172, 0.66667, 0.7421, 0.91191, 0.80981, 0.93994, 0.47821, 0.46945, 0.46592]},
+			'trace_3':{'x':['danceability', 'danceability', 'danceability', 'danceability', 'danceability', 'danceability', 'danceability', 'energy', 'energy', 'energy', 'energy', 'energy', 'energy', 'energy', 'tempo', 'tempo', 'tempo', 'tempo', 'tempo', 'tempo', 'tempo'],
+					   'y':[0.69419, 0.61468, 0.64628, 0.59327, 0.9103, 0.66463, 0.50255, 0.58158, 0.89489, 0.55055, 0.76476, 0.43243, 0.54755, 0.59359, 0.50802, 0.49561, 0.62163, 0.52491, 0.35227, 0.42982, 0.50684]}
+			}
+
+rock_hh = {'trace_1':{'x':['danceability', 'danceability', 'danceability', 'energy', 'energy', 'energy', 'tempo', 'tempo', 'tempo'],
+					   'y':[0.60347, 0.65545, 0.3629, 0.76677, 0.84885, 0.92392, 0.39516, 0.66412, 0.60622]},
+			'trace_2':{'x':['danceability', 'danceability', 'danceability', 'energy', 'energy', 'energy', 'tempo', 'tempo', 'tempo'],
+					   'y':[0.85117, 0.7421, 0.78491, 0.62563, 0.97397, 0.5045, 0.37283, 0.32571, 0.70362]},
+			'trace_3':{'x':['danceability', 'danceability', 'danceability', 'danceability', 'danceability', 'danceability', 'energy', 'energy', 'energy', 'energy', 'energy', 'energy', 'tempo', 'tempo', 'tempo', 'tempo', 'tempo', 'tempo'],
+					   'y':[0.85933, 0.45973, 0.6789, 0.49643, 0.51886, 0.52497, 0.8048, 0.96997, 0.93594, 0.8979, 0.8028, 0.86386, 0.38886, 0.50149, 0.37507, 0.55427, 0.76147, 0.63059]}
+			}
+
+mixed = {'trace_1':{'x':['danceability', 'danceability', 'danceability', 'energy', 'energy', 'energy', 'tempo', 'tempo', 'tempo'],
+					'y':[0.79817, 0.44241, 0.55352, 0.57958, 0.8969, 0.86987, 0.49156, 0.60913, 0.41286]},
+		'trace_2':{'x':['danceability', 'danceability', 'danceability', 'energy', 'energy', 'energy', 'tempo', 'tempo', 'tempo'],
+				   'y':[0.59021, 0.77778, 0.87156, 0.50751, 0.80681, 0.84685, 0.60257, 0.42201, 0.50231]},
+		'trace_3':{'x':['danceability', 'danceability', 'danceability', 'danceability', 'danceability', 'danceability', 'danceability', 'energy', 'energy', 'energy', 'energy', 'energy', 'energy', 'energy', 'tempo', 'tempo', 'tempo', 'tempo', 'tempo', 'tempo', 'tempo'],
+				   'y':[0.83384, 0.89093, 0.56371, 0.60754, 0.7788, 0.80428, 0.8028, 0.69169, 0.86787, 0.86887, 0.73273, 0.6016, 0.43811, 0.47516, 0.57358, 0.45012, 0.47585, 0.45021]}
+			}
+
+# def demo_case(query_a, query_b):
+# 	if (query_a == "Bad Romance, Lady Gaga; Fantasy, Mariah Carey; Cry Me a River, Justin Timberlake") & (query_b == "Smells Like Teen Spirit, Nirvana; Island In the Sun, Weezer; Never Let You Go, Third Eye Blind"):
+
+# 		return df
+
+# 	elif (query_a == "The Middle, Jimmy Eat World; Mr. Brightside, The Killers; Californication, Red Hot Chili Peppers") & (query_b == "Hey Ya, OutKast; In My Feelings, Drake; Waterfalls, TLC"):
+
+# 		return df
+
+# 	elif (query_a == "Call Me Maybe, Carly Rae Jepsen; Dancing Queen, ABBA; All The Small Things, blink-182") & (query_b == "Electric Feel, MGMT; Got To Give It Up, Marvin Gaye; Hotel California, Eagles"):
+
+# 		return df
+
+		

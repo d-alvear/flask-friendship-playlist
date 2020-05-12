@@ -28,18 +28,8 @@ client_credentials_manager = SpotifyClientCredentials(client_id=spotify_credenti
 													  client_secret=spotify_credentials['client_secret'])
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
-##====User A: pop, rock, classic rock
-##====User B: classic rock, classic rock, hip hop
-query_a = "BFF, Kesha; teenagers, my chemical romance; you're so vain, carly simon"
-query_b = "ball and chain, janis joplin; fire and rain, james taylor; in my feelings, drake"
-# query_a = "bad and boujee, migos; god's plan, drake; fade, kanye west"
-# query_b = "once in a lifetime, talking heads; crazy on you, heart; ramble on, led zeppelin"
-# query_a = "in a river, rostam; summer girl, haim; real love baby, father john misty"
-# query_b = "swim, mild minds; dance yrself clean, lcd soundsystem; talia, king princess"
-# query_a="never let you go, third eye blind; summer girl, haim; my song 5, haim"
-# query_b="once in a lifetime, talking heads; never let you go, third eye blind; fade, kanye west"
-# query_a = "call me maybe, carly rae jepsen; dancing queen, ABBA; all the small things, blink-182"
-# query_b = "electric feel, MGMT; got to give it up, marvin gaye; hotel california, eagles"
+query_a = "call me maybe, carly rae jepsen; dancing queen, ABBA; all the small things, blink-182"
+query_b = "electric feel, MGMT; got to give it up, marvin gaye; hotel california, eagles"
 
 # query_a = "bad romance, lady gaga; fantasy, mariah carey; cry me a river, justin timberlake"
 # query_b = "smells like teen spirit, nirvana; island in the sun, weezer; never let you go, third eye blind"
@@ -71,7 +61,8 @@ def friendship_app(query_a,query_b):
 			user_b_df = not_in_database_pipeline(user_list[1],user_b_in_db)
 			print("Need to Get")
 
-
+	print(list(user_a_df.loc[:,'track_id']))
+	print(list(user_b_df.loc[:,'track_id']))
 	# not_null_list = []
 	# spotify_features_list = []
 	# metadata_list = []

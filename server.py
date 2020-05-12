@@ -1,22 +1,25 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from flask import Flask, request, render_template, redirect, Response
+from flask import Flask, request, render_template, redirect, Response, Markup
 from project_utils import *
 from genre_replace import genre_replace
 from secret import *
 import pandas as pd
 import numpy as np
 import psycopg2 as pg
+from psycopg2 import Error
 import librosa
 import spotipy
 import requests
-
+from plotly.offline import plot
+import plotly.graph_objs as go
 
 # connect to spotify_db
 conn = pg.connect(database=sql_credentials['database'],
                   user=sql_credentials['user'], 
                   password=sql_credentials['password'],
                   host=sql_credentials['host'])
+
 
 
 # Authenticate with Spotify using the Client Credentials flow
@@ -44,9 +47,44 @@ def homepage():
 def about():
 	return render_template('about.html')
 
-@app.route('/test_cases')
+@app.route('/demo')
 def test_cases():
-	return render_template('test_cases.html')
+	pr_fig = go.Figure()
+	pr_fig.add_trace(go.Violin(x=pop_rock['trace_1']['x'],y=pop_rock['trace_1']['y'],name="Pop Songs"))
+	pr_fig.add_trace(go.Violin(x=pop_rock['trace_2']['x'],y=pop_rock['trace_2']['y'],name="Rock Songs"))
+	pr_fig.add_trace(go.Violin(x=pop_rock['trace_3']['x'],y=pop_rock['trace_3']['y'],name="Recommended Songs"))
+	pr_fig.update_traces(box_visible=True, meanline_visible=True)
+	pr_fig.update_layout(title={'text': "Comparison of Audio Features",'x':0.43,'y':0.88},
+					  xaxis_title="Audio Features",yaxis_title="Normalized Feature Values",violinmode='group',font=dict(size=12),
+					  autosize=False,width=1000,height=500,margin=dict(l=50,r=50,b=100,t=100,pad=4
+						))
+	pr_plot = plot(pr_fig,output_type='div')
+
+	rhh_fig = go.Figure()
+	rhh_fig.add_trace(go.Violin(x=rock_hh['trace_1']['x'],y=rock_hh['trace_1']['y'],name="Rock Songs"))
+	rhh_fig.add_trace(go.Violin(x=rock_hh['trace_2']['x'],y=rock_hh['trace_2']['y'],name="Hip Hop Songs"))
+	rhh_fig.add_trace(go.Violin(x=rock_hh['trace_3']['x'],y=rock_hh['trace_3']['y'],name="Recommended Songs"))
+	rhh_fig.update_traces(box_visible=True, meanline_visible=True)
+	rhh_fig.update_layout(title={'text': "Comparison of Audio Features",'x':0.43,'y':0.88},
+					  xaxis_title="Audio Features",yaxis_title="Normalized Feature Values",violinmode='group',font=dict(size=12),
+					  autosize=False,width=1000,height=500,margin=dict(l=50,r=50,b=100,t=100,pad=4
+						))
+	
+	rhh_plot = plot(rhh_fig,output_type='div')
+
+	mx_fig = go.Figure()
+	mx_fig.add_trace(go.Violin(x=mixed['trace_1']['x'],y=mixed['trace_1']['y'],name="Pop, Disco, Rock Songs"))
+	mx_fig.add_trace(go.Violin(x=mixed['trace_2']['x'],y=mixed['trace_2']['y'],name="Indie, Funk, Classic Rock Songs"))
+	mx_fig.add_trace(go.Violin(x=mixed['trace_3']['x'],y=mixed['trace_3']['y'],name="Recommended Songs"))
+	mx_fig.update_traces(box_visible=True, meanline_visible=True)
+	mx_fig.update_layout(title={'text': "Comparison of Audio Features",'x':0.43,'y':0.88},
+					  xaxis_title="Audio Features",yaxis_title="Normalized Feature Values",violinmode='group',font=dict(size=12),
+					  autosize=False,width=1000,height=500,margin=dict(l=50,r=50,b=100,t=100,pad=4
+						))
+	mx_plot = plot(mx_fig,output_type='div')
+
+
+	return render_template('demo.html',div_placeholder_1=Markup(pr_plot), div_placeholder_2=Markup(rhh_plot), div_placeholder_3=Markup(mx_plot))
 
 @app.route('/results', methods=['POST','GET'])
 def friendship_app():
@@ -57,7 +95,7 @@ def friendship_app():
 	# REWRITE THIS TO CHECK BOTH USERS' QUERIES
 	for q in [query_a, query_b]:
 		if check_query_format(q) == False:
-			return "One or both of your queries don't look quite right, make sure they look like the example. They should include the name of the song, and the artist, separated by a comma."
+			return render_template('error.html')
 		else:
 			pass
 
@@ -95,16 +133,16 @@ def friendship_app():
 
 
 	recommendations = get_combined_recommendations(cosine_df)
-	#======= PASS THIS INTO RESULTS.HTML =======#
-	# if len(no_preview) > 0:
-	# 	print("Could not get recommendations for:")
-	# 	for i in no_preview.values():
-	# 		print(i)
-
+	
+	#generate result plot
+	combined = format_dataframe(user_a_df,user_b_df,recommendations)
+	plot_div = generate_plot(combined)
 
 	return render_template('results.html', 
 							tables=[recommendations[['track_name','artist','genre']].to_html(classes='data')], 
-							titles=[recommendations.columns.values])
+							titles=[recommendations.columns.values],
+							div_placeholder=Markup(plot_div)
+							)
 
 if __name__ == '__main__':
 	app.run()

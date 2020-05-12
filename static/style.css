@@ -92,6 +92,28 @@ body {
   min-height: 55px;
   margin-bottom: 0;
 }
+
+.inline-container {
+  display: inline-flex;
+}
+
+.modebar-container {
+  display: none;
+}
+
+.user-header {
+  margin: 0 0 0 0;
+  min-width: 62px;
+}
+
+.right-user-header {
+  margin-left: 5% !important;
+}
+
+.user-list {
+  max-width: 350px !important;
+  padding-left: 20px;
+}
 /* 
 .sp-container {
   display: flex;

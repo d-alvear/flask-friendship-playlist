@@ -8,3 +8,4 @@ psycopg2
 librosa
 sklearn
 python-dotenv
+plotly

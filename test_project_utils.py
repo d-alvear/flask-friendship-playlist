@@ -16,10 +16,14 @@ client_credentials_manager = SpotifyClientCredentials(client_id=spotify_credenti
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 #=============================== SQL Utils ====================================#
-conn = pg.connect(database=sql_credentials['database'],
-				  user=sql_credentials['user'], 
-				  password=sql_credentials['password'],
-				  host =sql_credentials['host'])
+# conn = pg.connect(database=sql_credentials['database'],
+# 				  user=sql_credentials['user'], 
+# 				  password=sql_credentials['password'],
+# 				  host =sql_credentials['host'])
+
+conn = pg.connect(database="spotify_db",
+				  user="postgres", 
+				  password="damara1004")
 
 def run_query(q):
 	'''a function that takes a SQL query as an argument
@@ -428,6 +432,7 @@ def get_similar_track_ids(user_df, user_in_db):
 		tracks = run_query(q)
 		tracks = tracks.loc[:,'track_id_2']
 		recs.extend(list(tracks))
+		
 	return recs
 
 def get_feature_vector_array(id_list):
@@ -472,7 +477,7 @@ def get_combined_recommendations(cosine_df):
 	final recommendations'''
 
 	scores = {max(row): [i,row.idxmax()] for i, row in cosine_df.iterrows() }
-		
+
 	top_songs = sorted(scores,reverse=True)[:4]
 
 	ids = [scores[i][0] for i in top_songs] + [scores[i][1] for i in top_songs]
