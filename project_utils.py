@@ -330,18 +330,28 @@ def generate_user_df(user_input_df, all_features_df):
 
 def get_similar_track_ids(user_df, user_in_db):
 	''''''
-	if user_in_db.empty == False:
+	# splitting track_ids by whether they're in the db already or not
+	if user_in_db.empty == False: # if in_db is not empty
+		#getting track_ids, 
 		track_ids = list(user_in_db.loc[:,'track_id'])
+
+		#if the id isn't in 'user_in_db'/isn't in the db already
 		not_in_db = user_df[~user_df['track_id'].isin(track_ids)]
+		#songs already in the db
 		in_db = user_in_db
-	elif user_in_db.empty == True:
+
+	elif user_in_db.empty == True: # if in_db is empty
+		# all songs go into 'not_in_db'
 		not_in_db = user_df
 		in_db = None
 	
+	# getting genres for songs that aren't in the db
 	genres = not_in_db.loc[:,'genre'].unique()
 	
 	if None in genres:
-		print("Generating Window function")
+		'''If a song's genre isn't recognized, get 10 songs from the most popular
+			genres, we will calculate the similarity between them'''
+		print("None in genres")
 		q = f'''
 		SELECT a.*, b.genre 
 		FROM ( SELECT track_id, genre, 
@@ -356,8 +366,10 @@ def get_similar_track_ids(user_df, user_in_db):
 		all_tracks = run_query(q)
 		all_tracks.set_index('track_id',inplace=True)
 	
+	# list of genres where all genres are recognized
 	genres = genres[genres != None]
 	print("Getting genre tracks")
+	# if there are more than 1 unique genres, get all the tracks that belong to those genres
 	if len(genres) > 1:
 		q = f'''
 		SELECT a.*, b.genre 
@@ -367,6 +379,7 @@ def get_similar_track_ids(user_df, user_in_db):
 		genre_tracks = run_query(q)
 		genre_tracks.set_index('track_id',inplace=True)
 
+	# if only one unique genre then get all the tracks that belong to it
 	elif len(genres) == 1:
 		q = f'''
 		SELECT a.*, b.genre 
@@ -378,31 +391,36 @@ def get_similar_track_ids(user_df, user_in_db):
 	
 	# for tracks that aren't already in the database
 	recs = []
-	print("Not in DB Block")
+	print("Getting not in db songs")
+	# if not_in_db is not empty
 	if not_in_db.empty == False:
+		# iterate over the df
 		for i,row in not_in_db.iterrows():
+			# do this if a genre == None
 			if row['genre'] == None:
 				matrix = all_tracks.apply(lambda x: cos_sim(x[2:-1], row[3:-1]),axis=1,result_type='reduce')
 				tracks = matrix.sort_values(ascending=False)[1:4].index
 				recs.extend(list(tracks))
-
+			# do this if a genre != None
 			else:
+				# g = all tracks that belong to the current row's genre
 				g = genre_tracks[genre_tracks['genre'] == row['genre']]
 				matrix = g.apply(lambda x: cos_sim(x[2:-1], row[3:-1]),axis=1,result_type='reduce')
 				tracks = matrix.sort_values(ascending=False)[1:4].index
 				recs.extend(list(tracks))
 	
+	# if there are songs in the db already
 	if in_db is not None:
-		print("Getting similarities")
+		print("Getting db songs")
 		set_ids = list(in_db.loc[:,'track_id'])
 		q = f'''
-			SELECT track_id_2
-			FROM (SELECT track_id_1,track_id_2,score, 
-				row_number() OVER (PARTITION BY track_id_1)
-				FROM similarities
-				WHERE track_id_1 IN {tuple(set_ids)}
-				ORDER BY 1,3 DESC) as b
-			WHERE row_number < 3
+			WITH sub_table AS 
+				(SELECT track_id_1,track_id_2,score,
+				 ROW_NUMBER() OVER(PARTITION BY track_id_1 ORDER BY score DESC)
+				 AS row_num FROM similarities)
+			SELECT track_id_2 FROM sub_table
+			WHERE track_id_1 IN {tuple(set_ids)}
+			AND row_num < 3
 			'''
 		tracks = run_query(q)
 		tracks = tracks.loc[:,'track_id_2']
