@@ -10,69 +10,123 @@
 <h1>Demo Cases</h1>
 </header>
 <main>
-    <h3>Demo 1: Pop vs. Rock</h3>
-    <span class="inline-container">
-        <h4 class="left-user-header user-header">Pop Songs:</h4>
-        <ul class="user-list" style="width: 340px;">
-            <li>Bad Romance, Lady Gaga</li>
-            <li>Fantasy, Mariah Carey</li>
-            <li>Cry Me a River, Justin Timberlake</li>
-        </ul>
-        <h4 class="right-user-header user-header">Rock Songs:</h4>
-        <ul class="user-list" style="width: 340px;">
-            <li>Smells Like Teen Spirit, Nirvana</li>
-            <li>Island In the Sun, Weezer</li>
-            <li>Never Let You Go, Third Eye Blind</li>
-        </ul>
-        <h4 class="right-user-header user-header">Results:</h4>
-        <ul class="user-list" style="width: 340px;">
-            <li>18, One Direction, pop</li>
-            <li>For Me This Is Heaven, Jimmy Eat World, rock</li>
-            <li>Say It Ain't So, Weezer, rock</li>
-            <li>Stellar, Incubus, rock</li>
-            <li>I Wanna Be Down, Brandy, pop</li>
-            <li>Too Good, Ayoni, pop</li>
-            <li>Dynasty, MIIA, pop</li>
-        </ul>
-    </span>
-    <h4>Interpretation</h4>
-    <p>This grouped violin plot compares how the values of danceability, energy, and tempo are distributed
-        among the pop and rock songs selected for this demo and the resulting songs picked by Friendshipify.
-        The value where the violin is the widest, represents a higher probability that all songs in the given 
-        genre will take on that value. Values where the violin is skinniest represents a lower probability of songs
-        in the genre taking on that value.
-
-        The leftmost violin group shows the distribution of danceability values among the 
-        two genres and the resulting songs. Pop songs (purple) 
+    <h2>Demo 1: Pop vs. Rock</h2>
+    <p style="width: 1200px;">Two friends, Donna and Jackie, both like different music. 
+        Jackie loves 2000s pop and Mariah Carey's early music. Donna 
+        prefers rock from the 90's to early 2000s. They decide to see
+        what songs Friendshipify would recommend to them.
     </p>
-    <span>
-        {{ div_placeholder_1 }}
+    <span class="inline-container">
+        <h4 class="left-user-header user-header" style="width: 110px;"><b>Jackie's Pop Songs:</b></h4>
+            <ul class="user-list">
+                <li>Bad Romance, Lady Gaga</li>
+                <li>Fantasy, Mariah Carey</li>
+                <li>Cry Me a River, Justin Timberlake</li>
+            </ul>
+        <h4 class="middle-user-header user-header" style="margin-left: 20px;"><b>Donna's Rock Songs:</b></h4>
+            <ul class="user-list">
+                <li>Smells Like Teen Spirit, Nirvana</li>
+                <li>Island In the Sun, Weezer</li>
+                <li>Never Let You Go, Third Eye Blind</li>
+            </ul>
+        <h4 class="right-user-header user-header"><b>Results:</b></h4>
+        <ul class="user-list">
+            <li>The Chamber, Lenny Kravitz, pop</li>
+            <li>Beverly Hills, Weezer, rock</li>
+            <li>Semi-Charmed Life, Third Eye Blind, rock</li>
+            <li>My Wave, Soundgarden, rock</li>
+            <li>MMMBop, Hanson, pop</li>
+            <li>Still Got Me, Daniel Merriweather, pop</li>
+            <li>Good In Goodbye, Madison Beer, pop</li>
+        </ul>
     </span>
+    <h3 style="margin-top: 8px; margin-bottom: 8px;">Results</h3>
+    <div class="row">
+        <div class="columns">
+            <!-- <span> -->
+                {{ div_placeholder_1 }}
+            <!-- </span> -->
+        </div>
+        <div class="columns">
+            <h4 style="margin-bottom: 5px;"><b>Plot Features:</b></h4>
+            <p style="margin-bottom: 7px;">From the <a target="_blank" rel="noopener noreferrer" href="https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/">Spotify API Docs</a></p>
+            <blockquote class="small-blockquote">
+                <ul style="padding-left: 20px; width: 520px;">
+                    <li class="blockquote-li"><b>Danceability</b>: how suitable a track is for dancing based on a combination of tempo, rhythm stability, beat strength
+                        and overall regularity. A value of 0.0 is least dancaeable, and 1.0 is most danceable.
+                    </li>
+                    <li class="blockquote-li"><b>Energy</b>: a measure from 0.0 to 1.0 and represents a perceptual measure of intensity and activity. Typically, energetic 
+                        tracks feel fast, loud, and noisy. For example, death metal has high energy, while a Bach prelude scores low on the scale. </li>
+                    <li class="blockquote-li"><b>Tempo</b>: the overall estimated tempo of a track in beats per minute (BPM). In musical terminology, tempo is the speed or pace 
+                        of a given piece and derives directly from the average beat duration. </li>
+                    <li class="blockquote-li"><b>Valence</b>: a measure from 0.0 to 1.0 describing the musical positiveness conveyed by a track. Tracks with high valence sound 
+                        more positive (e.g. happy, cheerful, euphoric), while tracks with low valence sound more negative (e.g. sad, depressed, angry).</li>
+                </ul>
+            </blockquote>
+        </div>
+    </div>
+    <div class="row">
+        <div class="columns">
+            <h4><b>Plot Explanation:</b></h4>
+                <p style="width: 620px;">This grouped violin plot compares the audio features of Jackie and Donna's songs. The box plot inside the violin shows how the features of 
+                    both friends' songs are distributed, while the curve of the violin represents the probability of all songs in the genre taking on the associated feature value.
+                    In other words, if Jackie and Donna each picked a fourth song, there is a higher probability their fourth song will take on a value where the violin is widest,
+                    and a lower probability of their song having a value where the violin is the skinniest. These probabilities can be seen by hovering over the violin and 
+                    seeing how the <b>kernel density estimate (kde)</b> changes as you move along the violin.
+                </p>
+                <p style="width: 620px;">Jackie's pop songs have a lower tempo, are moderately danceable, have varied energy, and are moderately positive. All Donna's rock songs 
+                    appear to have the same low tempo, are less danceable than Jackie's pop songs, have high energy and are moderately positive.
+                </p>
+                <p style="width: 620px;">The distribution of values for the songs recommended by Friendshipify appear to visually match the distributions of Jackie and Donna's songs.
+                    The recommended songs have the same low tempo as Jackie and Donna's songs, as well as the varied positiveness. The energy values of the recommendations seem to encompass
+                    the range of values seen in both friends' songs. However, there is a higher probability of Friendshipify recommending high energy songs like Donna's. The danceability values
+                    of the recommendations is interesting due to the inclusion of two extreme values of 0.88 and 0.51, despite the rest of the songs falling within the mean danceability values 
+                    for both Jackie and Donna. Friendshipify could be including these extreme values to address the 50% probability of Jackie's next song having a danceability value of 0.88 or the
+                    fact that one of Donna's songs has a danceability value of 0.51.  
+                </p>
+        </div>
+        <div class="columns">
+                
+                <p style="width: 620px; margin-top: 43px;">Despite the differences in danceability, the results seem to be good ones based on the plotted features. I feel that the songs audibly match. Lenny Kravitz's
+                    "The Chamber" sounds very pop/rock. "MMMBop" matches the era of both Jackie and Donna's picks and sounds similar to Third Eye Blind's "Never Let You Go" and "Semi-Charmed Life".
+                </p>
+            <!-- <p> The leftmost violin group shows the distribution of danceability values among the 
+                two genres and the resulting songs. Pop songs (purple) 
+            </p> -->
+        </div>
+    </div>
     <br></br>
 
     <h3>Demo 2: Rock vs. Hip Hop</h3>
+    <p>Donna and Jackie's friend Hyde also likes the same kind of rock music as Donna. 
+         They ask their friend Fez what kind of music he likes. He likes hip hop and 
+         his two favorite groups are OutKast and TLC. Fez also thought Drake's 
+         song "In My Feelings" was pretty catchy when it came out. Rock and hip hop
+         are very distinct genres, so Hyde and Fez see what kinds of songs Friendshipify
+         recommends to them.</p>
+
     <span class="inline-container">
-        <h4 class="left-user-header user-header">Rock Songs:</h4>
+        <h4 class="left-user-header user-header">Hyde's Rock Songs:</h4>
         <ul class="user-list" style="width: 340px;">
             <li>The Middle, Jimmy Eat World</li>
             <li>Mr. Brightside, The Killers</li>
             <li>Californication, Red Hot Chili Peppers</li>
         </ul>
-        <h4 class="right-user-header user-header">Hip Hop Songs:</h4>
+        <h4 class="right-user-header user-header">Fez's Hip Hop Songs:</h4>
         <ul class="user-list" style="width: 340px;">
             <li>Hey Ya, OutKast</li>
             <li>In My Feelings, Drake</li>
             <li>Waterfalls, TLC</li>
         </ul>
-        <h4 class="right-user-header user-header">Results:</h4>
+        <h4 class="user-header">Results:</h4>
         <ul class="user-list" style="width: 340px;">
-            <li>Ms. Jackson, OutKast, hip hop</li>
-            <li>By the Way, Red Hot Chili Peppers, rock</li>
-            <li>Give It Away, Red Hot Chili Peppers, rock</li>
-            <li>Shot At The Night, The Killers, rock</li>
-            <li>Nice to Know You, Incubus, rock</li>
-            <li>Africa, Weezer, rock</li>
-            <li>Bounce, Logic, hip hop</li>
+            <li>One Dance, Drake, hip hop</li>
+            <li>Hold Me Down, Motion City Soundtrack, rock</li>
+            <li>The Royal We, Silversun Pickups, rock</li>
+            <li>Tones Of Home, Blind Melon, rock</li>
+            <li>Three Is A Magic Number, Blind Melon, rock</li>
+            <li>Backyard, Kota the Friend, hip hop</li>
+            <li>Sucker M.C.'s, Run-D.M.C., hip hop</li>
         </ul>
     </span>
     <h4>Interpretation</h4>
@@ -81,29 +135,33 @@
     </span>
     <br></br>
     <h3>Demo 3: Mixed Genres</h3>
+    <p> The four friends decide to ask their friends Eric and Kelso about the kind of music they like.
+        Eric likes indie songs while Kelso loves funk, Marvin Gaye is his favorite artist.
+        The group wonders what songs Friendshipify would give if they put in songs from all their favorite
+        genres. To make things interesting, Fez decides to put in an ABBA song and Donna changes her genre
+        to classic rock.
+    </p>
     <span class="inline-container">
-        <h4 class="left-user-header user-header">Pop, Disco, Rock Songs:</h4>
+        <h4 class="left-user-header user-header">Jackie, Fez, and Hyde's Songs:</h4>
         <ul class="user-list" style="width: 340px;">
             <li>Call Me Maybe, Carly Rae Jepsen</li>
             <li>Dancing Queen, ABBA</li>
             <li>All The Small Things, blink-182</li>
         </ul>
-        <h4 class="right-user-header user-header">Indie, Funk, Classic Rock Songs:</h4>
+        <h4 class="middle-user-header user-header">Eric, Kelso, and Donna's Songs:</h4>
         <ul class="user-list" style="width: 340px;">
             <li>Electric Feel, MGMT</li>
             <li>Got To Give It Up, Marvin Gaye</li>
             <li>Hotel California, Eagles</li>
         </ul>
-    </span>
-    <span class="inline-container">
-        <h4 class="right-user-header user-header">Results:</h4>
+        <h4 class="user-header">Results:</h4>
         <ul class="user-list" style="width: 340px;">
-            <li>Only Want You, Rita Ora, pop</li>
-            <li>Magnets, Sam Feldt, pop</li>
-            <li>Dance the Night Away, Van Halen, classic rock</li>
-            <li>Walking On Sunshine, Katrina & The Waves, pop</li>
-            <li>Wannabe, Spice Girls, pop</li>
-            <li>Special, Chloe Lilac, indie</li>
+            <li>Post Malone, Sam Feldt, pop</li>
+            <li>Bad To You, Ariana Grande, pop</li>
+            <li>Blow Me, The Used, rock</li>
+            <li>Pretty Peggy, Wolfmother, rock</li>
+            <li>Fortunate Son, Creedence Clearwater Revival, classic rock</li>
+            <li>Walls, ROZES, indie</li>
         </ul>
     </span>
     <h4>Interpretation</h4>

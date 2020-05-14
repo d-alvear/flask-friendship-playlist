@@ -499,43 +499,43 @@ def not_in_database_pipeline(to_get,in_db):
 
 def format_dataframe(user_a_df,user_b_df,recommendations):
 	user_a_df.loc[:,'user'] = 'user a'
-	user_a_df = user_a_df[['danceability','energy','tempo','user']]
+	user_a_df = user_a_df[['danceability','energy','tempo','valence','user']]
 
-	v = [user_a_df.loc[:,'danceability'].values, user_a_df.loc[:,'energy'].values , user_a_df.loc[:,'tempo'].values]
+	v = [user_a_df.loc[:,'danceability'].values, user_a_df.loc[:,'energy'].values , user_a_df.loc[:,'tempo'].values, user_a_df.loc[:,'valence'].values]
 	values = [item for sublist in v for item in sublist]
 
-	l = [[c]*3 for c in user_a_df.columns[:-1]]
+	l = [[c]*(len(user_a_df)) for c in user_a_df.columns[:-1]]
 	labels = [item for sublist in l for item in sublist]
 
-	user_a_label = ['user a'] * 9
+	user_a_label = ['user a'] * (len(user_a_df) * 4)
 
 	formatted_a = pd.DataFrame(data=[user_a_label, labels, values]).transpose()
 	formatted_a.columns = ['user','feature','value']
 
 	user_b_df.loc[:,'user'] = 'user b'
-	user_b_df = user_b_df[['danceability','energy','tempo','user']]
+	user_b_df = user_b_df[['danceability','energy','tempo','valence','user']]
 
-	v = [user_b_df.loc[:,'danceability'].values, user_b_df.loc[:,'energy'].values , user_b_df.loc[:,'tempo'].values]
+	v = [user_b_df.loc[:,'danceability'].values, user_b_df.loc[:,'energy'].values , user_b_df.loc[:,'tempo'].values, user_b_df.loc[:,'valence'].values]
 	values = [item for sublist in v for item in sublist]
 
-	l = [[c]*3 for c in user_b_df.columns[:-1]]
+	l = [[c]*(len(user_b_df)) for c in user_b_df.columns[:-1]]
 	labels = [item for sublist in l for item in sublist]
 
-	user_b_label = ['user b'] * 9
+	user_b_label = ['user b'] * (len(user_b_df) * 4)
 
 	formatted_b = pd.DataFrame(data=[user_b_label, labels, values]).transpose()
 	formatted_b.columns = ['user','feature','value']
 
 	recommendations.loc[:,'user'] = 'result'
-	recommendations = recommendations[['danceability','energy','tempo','user']]
+	recommendations = recommendations[['danceability','energy','tempo','valence','user']]
 
-	v = [recommendations.loc[:,'danceability'].values, recommendations.loc[:,'energy'].values , recommendations.loc[:,'tempo'].values]
+	v = [recommendations.loc[:,'danceability'].values, recommendations.loc[:,'energy'].values , recommendations.loc[:,'tempo'].values, recommendations.loc[:,'valence'].values]
 	values = [item for sublist in v for item in sublist]
 
 	l = [[c]*(len(recommendations)) for c in recommendations.columns[:-1]]
 	labels = [item for sublist in l for item in sublist]
 
-	result_label = ['result'] * (3*len(recommendations))
+	result_label = ['result'] * (4*len(recommendations))
 
 	formatted_r = pd.DataFrame(data=[result_label, labels, values]).transpose()
 	formatted_r.columns = ['user','feature','value']
@@ -587,28 +587,28 @@ def generate_plot(combined):
 	return plot(fig,output_type='div')
 
 #======PLOT UTILS======#
-pop_rock = {'trace_1':{'x':['danceability', 'danceability', 'danceability', 'energy', 'energy', 'energy', 'tempo', 'tempo', 'tempo'],
-					   'y':[0.70948, 0.85321, 0.63609, 0.92092, 0.54755, 0.65265, 0.48739, 0.41979, 0.3026]},
-			'trace_2':{'x':['danceability', 'danceability', 'danceability', 'energy', 'energy', 'energy', 'tempo', 'tempo', 'tempo'],
-					   'y':[0.51172, 0.66667, 0.7421, 0.91191, 0.80981, 0.93994, 0.47821, 0.46945, 0.46592]},
-			'trace_3':{'x':['danceability', 'danceability', 'danceability', 'danceability', 'danceability', 'danceability', 'danceability', 'energy', 'energy', 'energy', 'energy', 'energy', 'energy', 'energy', 'tempo', 'tempo', 'tempo', 'tempo', 'tempo', 'tempo', 'tempo'],
-					   'y':[0.69419, 0.61468, 0.64628, 0.59327, 0.9103, 0.66463, 0.50255, 0.58158, 0.89489, 0.55055, 0.76476, 0.43243, 0.54755, 0.59359, 0.50802, 0.49561, 0.62163, 0.52491, 0.35227, 0.42982, 0.50684]}
+pop_rock = {'trace_1':{'x':['danceability', 'danceability', 'danceability', 'energy', 'energy', 'energy', 'tempo', 'tempo', 'tempo', 'valence', 'valence', 'valence'],
+					   'y':[0.70948, 0.85321, 0.63609, 0.92092, 0.54755, 0.65265, 0.48739, 0.41979, 0.3026, 0.71903, 0.82679, 0.56898]},
+			'trace_2':{'x':['danceability', 'danceability', 'danceability', 'energy', 'energy', 'energy', 'tempo', 'tempo', 'tempo', 'valence', 'valence', 'valence'],
+					   'y':[0.51172, 0.66667, 0.7421, 0.91191, 0.80981, 0.93994, 0.47821, 0.46945, 0.46592, 0.72508, 0.66566, 0.97382]},
+			'trace_3':{'x':['danceability', 'danceability', 'danceability', 'danceability', 'danceability', 'danceability', 'danceability', 'energy', 'energy', 'energy', 'energy', 'energy', 'energy', 'energy', 'tempo', 'tempo', 'tempo', 'tempo', 'tempo', 'tempo', 'tempo', 'valence', 'valence', 'valence', 'valence', 'valence', 'valence', 'valence'],
+					   'y':[0.6738, 0.70642, 0.6524, 0.51886, 0.69623, 0.88685, 0.67074, 0.92492, 0.82282, 0.86386, 0.94995, 0.93694, 0.6016, 0.6977, 0.48134, 0.36002, 0.41786, 0.51847, 0.42952, 0.4128, 0.56952, 0.92044, 0.74622, 0.70493, 0.70997, 0.62336, 0.77442, 0.46022]}
 			}
 
-rock_hh = {'trace_1':{'x':['danceability', 'danceability', 'danceability', 'energy', 'energy', 'energy', 'tempo', 'tempo', 'tempo'],
-					   'y':[0.60347, 0.65545, 0.3629, 0.76677, 0.84885, 0.92392, 0.39516, 0.66412, 0.60622]},
-			'trace_2':{'x':['danceability', 'danceability', 'danceability', 'energy', 'energy', 'energy', 'tempo', 'tempo', 'tempo'],
-					   'y':[0.85117, 0.7421, 0.78491, 0.62563, 0.97397, 0.5045, 0.37283, 0.32571, 0.70362]},
-			'trace_3':{'x':['danceability', 'danceability', 'danceability', 'danceability', 'danceability', 'danceability', 'energy', 'energy', 'energy', 'energy', 'energy', 'energy', 'tempo', 'tempo', 'tempo', 'tempo', 'tempo', 'tempo'],
-					   'y':[0.85933, 0.45973, 0.6789, 0.49643, 0.51886, 0.52497, 0.8048, 0.96997, 0.93594, 0.8979, 0.8028, 0.86386, 0.38886, 0.50149, 0.37507, 0.55427, 0.76147, 0.63059]}
+rock_hh = {'trace_1':{'x':['danceability', 'danceability', 'danceability', 'energy', 'energy', 'energy', 'tempo', 'tempo', 'tempo', 'valence', 'valence', 'valence'],
+					   'y':[0.65545, 0.3629, 0.60347, 0.84885, 0.92392, 0.76677, 0.66412, 0.60622, 0.39516, 0.90937, 0.23364, 0.33031]},
+		   'trace_2':{'x':['danceability', 'danceability', 'danceability', 'energy', 'energy', 'energy', 'tempo', 'tempo', 'tempo', 'valence', 'valence', 'valence'],
+					   'y':[0.7421, 0.85117, 0.78491, 0.97397, 0.62563, 0.5045, 0.32571, 0.37283, 0.70362, 0.9718, 0.35247, 0.76234]},
+		   'trace_3':{'x':['danceability', 'danceability', 'danceability', 'danceability', 'danceability', 'danceability', 'energy', 'energy', 'energy', 'energy', 'energy', 'energy', 'tempo', 'tempo', 'tempo', 'tempo', 'tempo', 'tempo', 'valence', 'valence', 'valence', 'valence', 'valence', 'valence', 'valence'],
+					   'y':[0.80734, 0.52599, 0.50051, 0.56677, 0.58512, 0.90928, 0.9368, 0.62462, 0.85385, 0.86386, 0.80781, 0.82482, 0.5966, 0.97497, 0.42581, 0.49183, 0.58996, 0.47217, 0.44451, 0.61449, 0.42178, 0.37261, 0.16314, 0.34743, 0.84995, 0.65458, 0.90131, 0.89023]}
 			}
 
-mixed = {'trace_1':{'x':['danceability', 'danceability', 'danceability', 'energy', 'energy', 'energy', 'tempo', 'tempo', 'tempo'],
-					'y':[0.79817, 0.44241, 0.55352, 0.57958, 0.8969, 0.86987, 0.49156, 0.60913, 0.41286]},
-		'trace_2':{'x':['danceability', 'danceability', 'danceability', 'energy', 'energy', 'energy', 'tempo', 'tempo', 'tempo'],
-				   'y':[0.59021, 0.77778, 0.87156, 0.50751, 0.80681, 0.84685, 0.60257, 0.42201, 0.50231]},
-		'trace_3':{'x':['danceability', 'danceability', 'danceability', 'danceability', 'danceability', 'danceability', 'danceability', 'energy', 'energy', 'energy', 'energy', 'energy', 'energy', 'energy', 'tempo', 'tempo', 'tempo', 'tempo', 'tempo', 'tempo', 'tempo'],
-				   'y':[0.83384, 0.89093, 0.56371, 0.60754, 0.7788, 0.80428, 0.8028, 0.69169, 0.86787, 0.86887, 0.73273, 0.6016, 0.43811, 0.47516, 0.57358, 0.45012, 0.47585, 0.45021]}
+mixed = {'trace_1':{'x':['danceability', 'danceability', 'danceability', 'energy', 'energy', 'energy', 'tempo', 'tempo', 'tempo', 'valence', 'valence', 'valence'],
+					'y':[0.79817, 0.55352, 0.44241, 0.57958, 0.86987, 0.8969, 0.49156, 0.41286, 0.60913, 0.66465, 0.75932, 0.68882]},
+		'trace_2':{'x':['danceability', 'danceability', 'danceability', 'energy', 'energy', 'energy', 'tempo', 'tempo', 'tempo', 'valence', 'valence', 'valence'],
+				   'y':[0.77778, 0.87156, 0.59021, 0.80681, 0.84685, 0.50751, 0.42201, 0.50231, 0.60257, 0.56294, 0.89627, 0.61329]},
+		'trace_3':{'x':['danceability', 'danceability', 'danceability', 'danceability', 'danceability', 'danceability', 'danceability', 'energy', 'energy', 'energy', 'energy', 'energy', 'energy', 'energy', 'tempo', 'tempo', 'tempo', 'tempo', 'tempo', 'tempo', 'tempo', 'valence', 'valence', 'valence', 'valence', 'valence', 'valence'],
+				   'y':[0.60143, 0.74108, 0.39246, 0.43323, 0.6524, 0.64424, 0.64164, 0.58258, 0.95095, 0.81782, 0.66266, 0.73073, 0.43969, 0.60609, 0.36794, 0.7043, 0.54378, 0.37265, 0.65559, 0.63343, 0.42598, 0.67271, 0.66767, 0.35549]}
 			}
 
 # def demo_case(query_a, query_b):

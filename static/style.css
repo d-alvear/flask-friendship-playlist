@@ -78,13 +78,34 @@
   box-sizing: border-box;
 }
 
-body { 
+/* body { 
   font-family: "CircularStd" !important;
-}
+} */
 
 /* container for main content block */
 .body-container {
   padding: 4px 0px 0px 16px;
+}
+
+.plot-container-plotly {
+  font-family: "CircularStd" !important;
+}
+
+.small-blockquote {
+  width: 750px;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  margin-right: 5px;
+  margin-left: 5px;
+  padding-left: 0px;
+  padding-bottom: 2px;
+  padding-top: 2px;
+  font-size: 16px !important;
+  font-weight: 400 !important;
+}
+
+.blockquote-li {
+  padding-bottom: 5px;
 }
 
 .navbar {
@@ -94,7 +115,7 @@ body {
 }
 
 .inline-container {
-  display: inline-flex;
+  display: flex;
 }
 
 .modebar-container {
@@ -103,16 +124,31 @@ body {
 
 .user-header {
   margin: 0 0 0 0;
-  min-width: 62px;
+  width: 100px;
 }
 
-.right-user-header {
-  margin-left: 5% !important;
+.left-user-header{
+  width: 110px;
+}
+
+.middle-user-header {
+  margin-left: 50px !important;
+  width: 120px;
+}
+.right-user-header{
+  margin-left: 50px;
+  width: 70px;
 }
 
 .user-list {
-  max-width: 350px !important;
   padding-left: 20px;
+}
+.row {
+  display: flex;
+}
+.columns {
+  flex: inherit;
+  padding: 10px;
 }
 /* 
 .sp-container {

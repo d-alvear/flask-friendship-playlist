@@ -20,8 +20,6 @@ conn = pg.connect(database=sql_credentials['database'],
                   password=sql_credentials['password'],
                   host=sql_credentials['host'])
 
-
-
 # Authenticate with Spotify using the Client Credentials flow
 client_credentials_manager = spotipy.SpotifyClientCredentials(client_id=spotify_credentials['client_id'],
 													  client_secret=spotify_credentials['client_secret'])
@@ -50,14 +48,14 @@ def about():
 @app.route('/demo')
 def test_cases():
 	pr_fig = go.Figure()
-	pr_fig.add_trace(go.Violin(x=pop_rock['trace_1']['x'],y=pop_rock['trace_1']['y'],name="Pop Songs"))
-	pr_fig.add_trace(go.Violin(x=pop_rock['trace_2']['x'],y=pop_rock['trace_2']['y'],name="Rock Songs"))
+	pr_fig.add_trace(go.Violin(x=pop_rock['trace_1']['x'],y=pop_rock['trace_1']['y'],name="Jackie's Pop Songs"))
+	pr_fig.add_trace(go.Violin(x=pop_rock['trace_2']['x'],y=pop_rock['trace_2']['y'],name="Donna's Rock Songs"))
 	pr_fig.add_trace(go.Violin(x=pop_rock['trace_3']['x'],y=pop_rock['trace_3']['y'],name="Recommended Songs"))
 	pr_fig.update_traces(box_visible=True, meanline_visible=True)
-	pr_fig.update_layout(title={'text': "Comparison of Audio Features",'x':0.43,'y':0.88},
-					  xaxis_title="Audio Features",yaxis_title="Normalized Feature Values",violinmode='group',font=dict(size=12),
-					  autosize=False,width=1000,height=500,margin=dict(l=50,r=50,b=100,t=100,pad=4
-						))
+	pr_fig.update_layout(title={'text': "Comparison of Audio Features",'yanchor':'middle','x':0.52},
+					  	 		xaxis_title="Audio Features",yaxis_title="Normalized Feature Values",violinmode='group',font=dict(size=12),
+					  	 		autosize=False,width=700,height=450,margin=dict(l=50,r=10,b=100,t=48,pad=1),
+						legend={'orientation': "h",'y':-0.2,'x':0.1})
 	pr_plot = plot(pr_fig,output_type='div')
 
 	rhh_fig = go.Figure()
@@ -65,10 +63,10 @@ def test_cases():
 	rhh_fig.add_trace(go.Violin(x=rock_hh['trace_2']['x'],y=rock_hh['trace_2']['y'],name="Hip Hop Songs"))
 	rhh_fig.add_trace(go.Violin(x=rock_hh['trace_3']['x'],y=rock_hh['trace_3']['y'],name="Recommended Songs"))
 	rhh_fig.update_traces(box_visible=True, meanline_visible=True)
-	rhh_fig.update_layout(title={'text': "Comparison of Audio Features",'x':0.43,'y':0.88},
-					  xaxis_title="Audio Features",yaxis_title="Normalized Feature Values",violinmode='group',font=dict(size=12),
-					  autosize=False,width=1000,height=500,margin=dict(l=50,r=50,b=100,t=100,pad=4
-						))
+	rhh_fig.update_layout(title={'text': "Comparison of Audio Features",'x':0.5,'y':0.88},
+					  	 		xaxis_title="Audio Features",yaxis_title="Normalized Feature Values",violinmode='group',font=dict(size=12),
+					  	 		autosize=False,width=700,height=450,margin=dict(l=50,r=50,b=100,t=100,pad=4),
+						legend={'orientation': "h",'y':-0.2,'x':0.1})
 	
 	rhh_plot = plot(rhh_fig,output_type='div')
 
