@@ -78,6 +78,9 @@
   box-sizing: border-box;
 }
 
+.navbar-collapse {
+  background-color: #f8f9fa;
+}
 /* body { 
   font-family: "CircularStd" !important;
 } */
@@ -115,7 +118,8 @@
 }
 
 .inline-container {
-  display: flex;
+  display: inline-block;
+  padding-left: 30px;
 }
 
 .modebar-container {

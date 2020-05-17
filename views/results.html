@@ -6,26 +6,44 @@
 
 {% block content %}
   <body>
-      <section class="results">
-        <h2>Your Playlist</h2>
-        <div>
-        <span>
-          {% for table in tables %}
-            {{ table|safe }}
-          {% endfor %}
-        </span>
-        <div>
-          {{ div_placeholder }}
+    <h2 style="padding-left: 15px; margin-bottom: 0px;">Your Playlist</h2>
+    <div class="body-container">
+      <span class="inline-container">
+        <div class="row">
+          <div class="columns" style="margin-right: 75px; padding-top: 10px;">
+              {{ rec_table.to_html(index=False,classes="table table-bordered")|safe }}
+          </div>
+          <div class="columns" style="padding-top: 0px;">
+              {{ div_placeholder }}
         </div>
+        <div class="row">
+          <div class="columns" style="padding-left: 10px, width: 520px;">
+            <h3 style="margin-bottom: 5px; width: 300px"><b>Plot Features:</b></h3>
+            <p style="margin-bottom: 7px;">From the <a target="_blank" rel="noopener noreferrer" href="https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/">Spotify API Docs</a></p>
+            <blockquote class="small-blockquote" style="width: 500px;">
+                <ul style="padding-left: 20px; width: 500px;">
+                  <li class="blockquote-li" style="width: 480px;"><b>Danceability</b>: how suitable a track is for dancing based on a combination of tempo, rhythm stability, beat strength
+                      and overall regularity. A value of 0.0 is least dancaeable, and 1.0 is most danceable.</li>
+                  <li class="blockquote-li"><b>Energy</b>: a measure from 0.0 to 1.0 and represents a perceptual measure of intensity and activity. Typically, energetic 
+                      tracks feel fast, loud, and noisy. For example, death metal has high energy, while a Bach prelude scores low on the scale. </li>
+                  <li class="blockquote-li"><b>Tempo</b>: the overall estimated tempo of a track in beats per minute (BPM). In musical terminology, tempo is the speed or pace 
+                      of a given piece and derives directly from the average beat duration. </li>
+                  <li class="blockquote-li"><b>Valence</b>: a measure from 0.0 to 1.0 describing the musical positiveness conveyed by a track. Tracks with high valence sound 
+                      more positive (e.g. happy, cheerful, euphoric), while tracks with low valence sound more negative (e.g. sad, depressed, angry).</li>
+                </ul>
+            </blockquote>
+          </div>
+          <div class="columns" style="margin-left: 25px;">
+              <h3><b>How To Interpret This Plot:</b></h3>
+                  <p style="width: 700px;">This grouped violin plot compares the audio features of of both friends songs. The box plot inside the violin shows how the features of 
+                      both friends' songs are distributed, while the curve of the violin represents the probability of all songs in the genre taking on the associated feature value.
+                      In other words, if each friend picked a fourth song, there is a higher probability the fourth song will take on a value where the violin is widest,
+                      and a lower probability of their song having a value where the violin is the skinniest. These probabilities can be seen by hovering over the violin and 
+                      seeing how the <b>kernel density estimate (kde)</b> changes as you move along the violin.
+                  </p>
+          </div>
         </div>
-      </section>
-    </body>
-
-<!--      Your web-app is https, so your scripts need to be too -->
-    <!-- <script src="https://code.jquery.com/jquery-2.2.1.min.js"
-            integrity="sha256-gvQgAFzTH6trSrAWoH1iPo9Xc96QxSZ3feW6kem+O00="
-            crossorigin="anonymous"></script>
-    <script src="/client.js"></script> -->
-
-
+      </span>
+      </div>
+  </body>
 {% endblock %}

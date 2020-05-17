@@ -4,9 +4,8 @@ secret.py
 *.sql
 *.pkl
 runtimes.txt
-test_project_utils.py
-test-pipeline.py
 test.py
 *.json
 data.txt
 debug.log
+*.wav

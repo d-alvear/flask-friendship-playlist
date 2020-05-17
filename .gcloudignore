@@ -25,6 +25,7 @@ index_demo.html
 genre_counts.py
 .ipynb
 cloud-credentials.json
+data.txt
 
 # Python pycache:
 __pycache__/

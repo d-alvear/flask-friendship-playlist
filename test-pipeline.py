@@ -15,12 +15,13 @@ import requests
 from genre_replace import genre_replace
 import time
 import multiprocessing as mp
-# import pickle
+from plotly.offline import plot
+import plotly.graph_objs as go
 
 # connect to spotify_db
 conn = pg.connect(database="spotify_db",
 				  user="postgres", 
-				  password="damara1004")
+				  password="")
 
 
 # Authenticate with Spotify using the Client Credentials flow
@@ -28,13 +29,19 @@ client_credentials_manager = SpotifyClientCredentials(client_id=spotify_credenti
 													  client_secret=spotify_credentials['client_secret'])
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
-query_a = "call me maybe, carly rae jepsen; dancing queen, ABBA; all the small things, blink-182"
-query_b = "electric feel, MGMT; got to give it up, marvin gaye; hotel california, eagles"
+# query_a = "call me maybe, carly rae jepsen; dancing queen, ABBA; all the small things, blink-182; on the radio, donna summer; hot stuff, donna summer"
+# query_b = "electric feel, MGMT; got to give it up, marvin gaye; hotel california, eagles; real love baby, father john misty"
 
 # query_a = "bad romance, lady gaga; fantasy, mariah carey; cry me a river, justin timberlake"
 # query_b = "smells like teen spirit, nirvana; island in the sun, weezer; never let you go, third eye blind"
 # query_a = "the middle, jimmy eat world; mr. brightside, the killers; californication, red hot chili peppers"
 # query_b = "hey ya, outkast; in my feelings, drake; waterfalls, tlc"
+
+# query_a = "don't start now, dua lipa; dance dance, fall out boy; zombie, the cranberries"
+# query_b = "toxic, britney spears; boredom, tyler the creator; the passenger, Siouxsie and the Banshees"
+
+query_a = "groove is in the heart, deelite; i wish, skeelo; don quichotte, magazine 60"
+query_b = "roses, outkast; P.I.M.P, 50 cent; thriller, michael jackson"
 
 def friendship_app(query_a,query_b):
 	# checks query format for both inputs
@@ -61,94 +68,26 @@ def friendship_app(query_a,query_b):
 			user_b_df = not_in_database_pipeline(user_list[1],user_b_in_db)
 			print("Need to Get")
 
-	print(list(user_a_df.loc[:,'track_id']))
-	print(list(user_b_df.loc[:,'track_id']))
-	# not_null_list = []
-	# spotify_features_list = []
-	# metadata_list = []
-	# for user_list in [user_a_to_get, user_b_to_get]:
-	# 	if len(user_list) == 0:
-	# 		print("Skipped")
-	# 		not_null_list.append(None)
-	# 		spotify_features_list.append(None)
-	# 		metadata_list.append(None)
-	# 		pass
-		
-	# 	elif len(user_list) > 0:
-	# 		print("Executing Block")
-	# 		metadata = gather_metadata(user_list)
-	# 		not_null, spotify_features = get_spotify_features(metadata)
-	# 		not_null_list.append(not_null)
-	# 		spotify_features_list.append(spotify_features)
-	# 		metadata_list.append(metadata)
-	
-	# del user_a_to_get
-	# del user_b_to_get
-
-	# librosa_list = []
-	# if not_null_list != [None, None]:
-	# 	track_list = prepare_tracklist(not_null_list)
-	# 	result_object = [pool.apply_async(single_librosa_pipeline, args=(x,)) for x in track_list]
-	# 	librosa_features_a, librosa_features_b = parse_result(not_null_list[0], not_null_list[1], result_object)
-	# 	librosa_list.append(librosa_features_a)
-	# 	librosa_list.append(librosa_features_b)
-	# else:
-	# 	print("Nothing to see here!")
-
-
-
-	# ====== MULTIPROCESSING METHOD GOES HERE ====== #
-	# POOL MAP
-	# result = pool.map(single_librosa_pipeline, track_list)
-
-	# REGULAR
-	# result = [single_librosa_pipeline(t) for t in track_list]
-
-	# # APPLY ASYNC ---fastest so far
-	# result_object = [pool.apply_async(single_librosa_pipeline, args=(x,)) for x in track_list]
-
-
-	# POOL IMAP
-	# result_object = pool.imap(single_librosa_pipeline, track_list)
-	# result = [r for r in result_object]
-
-	# ============================================== #
-	# user_a_len = len(user_a_in_db)
-	# user_b_len = len(user_b_in_db)
-	# for user_list in [user_a_len, user_b_len]:
-	# 	if user_list < 3:
-	# user_df_list = []
-	# if len(librosa_list) > 0:
-	# 	print("generating features")
-	# 	for m,l,s,i in zip(metadata_list, librosa_list, spotify_features_list, [user_a_in_db,user_b_in_db]):
-	# 		all_features = combine_all_features(m,l,s)
-	# 		user_df = generate_user_df(i,all_features)
-	# 		user_df = remap_genres(user_df)
-	# 		user_df_list.append(user_df)
-	# else:
-	# 	print("nothing to generate")
-	# 	user_df_list = [user_a_in_db, user_b_in_db]
-		# ----->  user_df_list = in_db
-	# all_features_a = combine_all_features(metadata[0], librosa_features_a, spotify_features[0])
-	# all_features_b = combine_all_features(metadata[1], librosa_features_b, spotify_features[1])
-
-
-	# user_a_df = generate_user_df(user_a_in_db, all_features_list[0])
-	# user_b_df = generate_user_df(user_b_in_db, all_features_list[1])
-
-
-			# # Mapping generalized genres to df
-	# user_a_df = remap_genres(user_a_df)
-	# user_b_df = remap_genres(user_b_df)
-
-
-	# user_a_ids = list(user_a_in_db['track_id'].values)
-	# user_b_ids = list(user_b_in_db['track_id'].values)
 	# Finding most similar songs to each user's input
 	
 	user_a_recs = [get_similar_track_ids(user_a_df, user_a_in_db)]
 	user_b_recs = [get_similar_track_ids(user_b_df, user_b_in_db)]
-	# user_b_recs = get_similar_track_ids(user_df_list[1],user_b_in_db,similarities)
+
+	user_a_recs_i = tuple(user_a_recs[0])
+	q = f'''SELECT track_id, track_name, artist, genre
+			FROM track_metadata
+			WHERE track_id IN {user_a_recs_i}
+			'''
+	a = run_query(q)
+	# print(a)
+
+	user_b_recs_i = tuple(user_b_recs[0])
+	q = f'''SELECT track_id, track_name, artist, genre
+			FROM track_metadata
+			WHERE track_id IN {user_b_recs_i}
+			'''
+	b = run_query(q)
+	# print(b)
 
 
 	user_a_index, user_a_array = get_feature_vector_array(user_a_recs)
@@ -160,50 +99,48 @@ def friendship_app(query_a,query_b):
 										 user_b_array,
 										 user_b_index)
 	
+	cosine_df_names = create_similarity_matrix(user_a_array,
+										 list(a.loc[:,'track_name']),
+										 user_b_array,
+										 list(b.loc[:,'track_name']))
+	print(a.loc[:,['track_name','artist']])
+	print(b.loc[:,['track_name','artist']])
+	
+	# headers = ["User A/User B","Nice to Meet Ya, Meghan Trainor","Genius, Sia","Star67, Drake","Uprising, Muse","Born For Greatness, Papa Roach","Can We, Phonte"]
+	# rows = ["Boyfriend, Mabel","Please Don't Go, Mike Posner","Paradise Lost, The Used","The Kill, Thirty Seconds To Mars","Something Changed, Pulp","American Dreams, Papa Roach"]
+	# cosine_df_names = cosine_df_names.round(4)
+	# # headers = headers.insert(0,"User A/User B")
+	# fig = go.Figure(data=[go.Table(columnwidth = [20,20],
+    # header=dict(values=headers,
+    #             fill_color='palegreen',
+	# 			line_color='black',
+    #             align=['left','center'],),
+    # cells=dict(values=[rows,cosine_df_names.loc['Boyfriend',:], cosine_df_names.loc["Please Don't Go",:], cosine_df_names.loc["Paradise Lost, a poem by John Milton",:], 
+	# 				   cosine_df_names.loc['The Kill (Bury Me)',:],cosine_df_names.loc['Something Changed',:],cosine_df_names.loc['American Dreams',:]],
+    #            fill=dict(color=['palegreen', 'white']),
+	# 		   line_color='black',
+    #            align='left'))
+	# 		   ])
+
+	# fig.show()
+	
 	recommendations = get_combined_recommendations(cosine_df)
 	
-	
-	# # if len(no_preview) > 0:
-	# # 	print("Could not get recommendations for:")
-	# # 	for i in no_preview.values():
-	# # 		print(f"{i[0]}, by {i[1]}")
+	# # combined = format_dataframe(user_a_df,user_b_df,recommendations)
+	# # print(list(combined.loc[:,'feature']))
+	# # print(list(combined.loc[:,'value']))
 	
 	return recommendations
 
 if __name__ ==  '__main__':
 
-	with mp.Pool(processes=4) as pool:
-		
-		#===== TEST 1: POOL USING MAP =====#
-		# start_1 = time.time()
-		
-		# r = friendship_app(query_a,query_b)
+	start_4 = time.time()
 
-		# end_1 = time.time()
-		# print(f"Pool Map -- Total: {end_1 - start_1}")
+	r = friendship_app(query_a,query_b)
 
-	
-		#===== TEST 2: REGULAR PROCESS =====# 
-		# start_2 = time.time()
-		
-		# r = friendship_app(query_a,query_b)
-
-		# end_2 = time.time()
-		# print(f"Regular -- Total: {end_2 - start_2}")
-		# print(len(r))
-	
-		
-		#===== TEST 4: APPLY ASYNC =====#
-		process = psutil.Process(os.getpid())
-		start_4 = time.time()
-
-		r = friendship_app(query_a,query_b)
-
-		end_4 = time.time()
-		print(f"Pool ApplyAsync -- Total: {end_4 - start_4}")
-		memoryUse = process.memory_info()[0] / float(2 ** 20)  # memory use in GB...I think
-		print('memory use:', memoryUse)
-		print(r)
+	end_4 = time.time()
+	print(f"Total: {end_4 - start_4}")
+	print(r)
 
 		#===== TEST 5: POOL IMAP =====#
 		# start_5 = time.time()

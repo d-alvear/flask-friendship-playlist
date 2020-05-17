@@ -17,11 +17,13 @@ client_credentials_manager = SpotifyClientCredentials(client_id=spotify_credenti
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 #=============================== SQL Utils ====================================#
-conn = pg.connect(database=sql_credentials['database'],
-				  user=sql_credentials['user'], 
-				  password=sql_credentials['password'],
-				  host=sql_credentials['host'])
-
+# conn = pg.connect(database=sql_credentials['database'],
+# 				  user=sql_credentials['user'], 
+# 				  password=sql_credentials['password'],
+# 				  host=sql_credentials['host'])
+conn = pg.connect(database="spotify_db",
+                  user="postgres", 
+                  password=)
 
 def run_query(q):
 	'''a function that takes a SQL query as an argument
@@ -40,20 +42,36 @@ def run_query(q):
 def search_and_extract(track_query):
 	'''A function that takes in a song query and returns
 	the track id and preview url for that track in a dict.'''
-
-	track_query = str(track_query)
+	
+	track_query = str(track_query).strip().replace(" ","+")
+	print(track_query)
 
 	#uses the API to search for a track
-	search = sp.search(track_query, type='track', limit=1, market='US')
+	try:
+		search = sp.search(track_query, type='track', limit=1, market='US')
 
-	track_id = search['tracks']['items'][0]['id']
-	preview_url = search['tracks']['items'][0]['preview_url']
-	track_name = search['tracks']['items'][0]['name']
-	artist = search['tracks']['items'][0]['artists'][0]['name']
-	artist_id = search['tracks']['items'][0]['artists'][0]['id']
+		track_id = search['tracks']['items'][0]['id']
+		preview_url = search['tracks']['items'][0]['preview_url']
+		track_name = search['tracks']['items'][0]['name']
+		artist = search['tracks']['items'][0]['artists'][0]['name']
+		artist_id = search['tracks']['items'][0]['artists'][0]['id']
 
-	search = sp.artist(artist_id)
-	genre_list = search['genres']
+		search = sp.artist(artist_id)
+		genre_list = search['genres']
+
+	except:
+		track_query = str(track_query).split(",")
+		name = track_query[0]
+		search = sp.search(name, type='track', limit=1, market='US')
+
+		track_id = search['tracks']['items'][0]['id']
+		preview_url = search['tracks']['items'][0]['preview_url']
+		track_name = search['tracks']['items'][0]['name']
+		artist = search['tracks']['items'][0]['artists'][0]['name']
+		artist_id = search['tracks']['items'][0]['artists'][0]['id']
+
+		search = sp.artist(artist_id)
+		genre_list = search['genres']
 
 	if preview_url == None:
 		url, new_genre = get_missing_url(artist, track_name)
@@ -77,14 +95,14 @@ def get_mp3(track_dict):
 	for track_id, properties in track_dict.items():
 		try:
 			doc = requests.get(properties[0])
-			with open(f'/tmp/track_{track_id}.wav', 'wb') as f:
+			with open(f'audio-files/track_{track_id}.wav', 'wb') as f:
 				f.write(doc.content)
 		except:
 			pass 
 
 def librosa_pipeline(track_id):
 	
-	path = f'/tmp/track_{track_id}.wav'
+	path = f'audio-files/track_{track_id}.wav'
 
 	d = {}
 	d['track_id'] = track_id
@@ -149,21 +167,24 @@ def check_query_format(query):
 def sort_inputs(query):
 	not_in_db = []
 	user_df = pd.DataFrame()
-	if "'" in query:
-		query = query.replace("'","_")
-	elif "." in query:
-		query = query.replace(".","_")
-	elif "-" in query:
-		query = query.replace("-","_")
 	
 	query = query[:-1] if query.endswith(';') else query
 	query = query.split(";")
 	
 	for track in query:
-		track = track.split(",")
+		split_track = track.split(",")
 
-		name = track[0].strip()
-		artist = track[1].strip()
+		if "'" in split_track:
+			new = split_track.replace("'","_")
+		elif "." in split_track:
+			new = split_track.replace(".","_")
+		elif "-" in split_track:
+			new = split_track.replace("-","_")
+		else:
+			new = split_track
+
+		name = new[0].strip()
+		artist = new[1].strip()
 
 		q = f'''SELECT a.*, b.genre 
 			FROM norm_tracks a 
@@ -175,17 +196,10 @@ def sort_inputs(query):
 			'''
 		r = run_query(q)
 		
-		if "'" in query:
-			name = name.replace("_","'")
-		elif "." in query:
-			name = name.replace("_",".")
-		elif "-" in query:
-			name = name.replace("_","-")
-		
 		if len(r) > 0:
 			user_df = user_df.append(r,ignore_index=True)
 		else:
-			not_in_db.append(name + " " + artist)
+			not_in_db.append(track)
 	
 	return user_df, not_in_db
 
@@ -250,7 +264,10 @@ def combine_all_features(metadata, librosa_features, spotify_features):
 				if row['track_id'] == k:
 					all_features.loc[i,'track_name'] = metadata[k][1]
 					all_features.loc[i,'artist'] = metadata[k][2]
-					all_features.loc[i,'genre'] = metadata[k][4][0]
+					if isinstance(metadata[k][4],list): 
+						all_features.loc[i,'genre'] = metadata[k][4][0]
+					elif isinstance(metadata[k][4],str):
+						all_features.loc[i,'genre'] = metadata[k][4]
 
 		all_features = all_features[['track_id','track_name', 'artist', 'spectral_centroid', 'spectral_bandwidth', 'rolloff',
 									'zero_crossing_rate', 'mfcc1', 'mfcc2', 'mfcc3', 'mfcc4', 'mfcc5',
@@ -399,32 +416,47 @@ def get_similar_track_ids(user_df, user_in_db):
 			# do this if a genre == None
 			if row['genre'] == None:
 				matrix = all_tracks.apply(lambda x: cos_sim(x[2:-1], row[3:-1]),axis=1,result_type='reduce')
-				tracks = matrix.sort_values(ascending=False)[1:4].index
+				tracks = matrix.sort_values(ascending=False)[1:3].index
 				recs.extend(list(tracks))
 			# do this if a genre != None
 			else:
 				# g = all tracks that belong to the current row's genre
 				g = genre_tracks[genre_tracks['genre'] == row['genre']]
 				matrix = g.apply(lambda x: cos_sim(x[2:-1], row[3:-1]),axis=1,result_type='reduce')
-				tracks = matrix.sort_values(ascending=False)[1:4].index
+				tracks = matrix.sort_values(ascending=False)[1:3].index
 				recs.extend(list(tracks))
 	
 	# if there are songs in the db already
 	if in_db is not None:
 		print("Getting db songs")
 		set_ids = list(in_db.loc[:,'track_id'])
-		q = f'''
-			WITH sub_table AS 
-				(SELECT track_id_1,track_id_2,score,
-				 ROW_NUMBER() OVER(PARTITION BY track_id_1 ORDER BY score DESC)
-				 AS row_num FROM similarities)
-			SELECT track_id_2 FROM sub_table
-			WHERE track_id_1 IN {tuple(set_ids)}
-			AND row_num < 3
-			'''
-		tracks = run_query(q)
-		tracks = tracks.loc[:,'track_id_2']
-		recs.extend(list(tracks))
+		if len(set_ids) > 1:
+			q = f'''
+				WITH sub_table AS 
+					(SELECT track_id_1,track_id_2,score,
+					ROW_NUMBER() OVER(PARTITION BY track_id_1 ORDER BY score DESC)
+					AS row_num FROM similarities)
+				SELECT track_id_2 FROM sub_table
+				WHERE track_id_1 IN {tuple(set_ids)}
+				AND row_num < 3
+				'''
+			tracks = run_query(q)
+			tracks = tracks.loc[:,'track_id_2']
+			recs.extend(list(tracks))
+		
+		elif len(set_ids) == 1:
+			q = f'''
+				WITH sub_table AS 
+					(SELECT track_id_1,track_id_2,score,
+					ROW_NUMBER() OVER(PARTITION BY track_id_1 ORDER BY score DESC)
+					AS row_num FROM similarities)
+				SELECT track_id_2 FROM sub_table
+				WHERE track_id_1 = '{set_ids[0]}'
+				AND row_num < 3
+				'''
+			tracks = run_query(q)
+			tracks = tracks.loc[:,'track_id_2']
+			recs.extend(list(tracks))
 	return recs
 
 def get_feature_vector_array(id_list):
@@ -562,27 +594,9 @@ def generate_plot(combined):
 							))
 
 	fig.update_traces(box_visible=True, meanline_visible=True)
-	fig.update_layout(title={
-                        'text': "Comparison of Audio Features",
-                        'y':0.9,
-                        'x':0.5,
-                        'xanchor': 'center',
-                        'yanchor': 'top'},
-                xaxis_title="Audio Features",
-                yaxis_title="Normalized Feauture Values",
-                violinmode='group',
-                font=dict(
-                        size=18),
-                autosize=False,
-                width=1000,
-                height=500,
-                margin=dict(
-                        l=50,
-                        r=50,
-                        b=100,
-                        t=100,
-                        pad=4
-                ))
+	fig.update_layout(title={'text': "Comparison of Audio Features",'yanchor':'middle','x':0.43},
+					  	 		xaxis_title="Audio Features",yaxis_title="Normalized Feature Values",violinmode='group',font=dict(size=12),
+					  	 		autosize=False,width=900,height=400,margin=dict(l=50,r=10,b=10,t=40,pad=1))
 
 	return plot(fig,output_type='div')
 

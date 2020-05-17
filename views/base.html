@@ -1,14 +1,21 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="https://sp-bootstrap.global.ssl.fastly.net/8.0.0/sp-bootstrap.min.css" rel="stylesheet">
     <title>Friendshipify</title>
-    <meta name="description" content="A cool thing made with Glitch">
+    <!-- <meta name="description" content="A cool thing made with Glitch"> -->
     <!-- <link id="favicon" rel="icon" href="https://gomix.com/favicon-app.ico" type="image/x-icon"> -->
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <script type="text/javascript" src="/static/client.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <link href="https://sp-bootstrap.global.ssl.fastly.net/8.0.0/sp-bootstrap.min.css" rel="stylesheet">
     <style type="text/css" media="screen, print">
       @font-face {
         font-family: "CircularStd";
@@ -20,9 +27,9 @@
       
     </style>
     <link rel="stylesheet" href="/static/style.css">
-    <script src="https://code.jquery.com/jquery-2.2.1.min.js"
+    <!-- <script src="https://code.jquery.com/jquery-2.2.1.min.js"
     integrity="sha256-gvQgAFzTH6trSrAWoH1iPo9Xc96QxSZ3feW6kem+O00="
-    crossorigin="anonymous"></script>
+    crossorigin="anonymous"></script> -->
 <script type="text/javascript" src="/static/client.js"></script>
   </head>
   <nav class="navbar navbar-expand-lg navbar-light bg-light" style="height: 55px;">
@@ -31,14 +38,13 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNavDropdown">
-      <ul class="navbar-nav">
+      <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
         <li class="nav-item active"><a class="nav-link" href="index" style="padding-top: 10px; padding-bottom: 10px; padding-right: 10px;">Home <span class="sr-only">(current)</span></a></li>
         <li class="nav-item"><a class="nav-link" href="about" style="padding-top: 10px; padding-bottom: 10px; padding-right: 10px;">About</a></li>
         <li class="nav-item"><a class="nav-link" href="demo" style="padding-top: 10px; padding-bottom: 10px; padding-right: 10px;">Demo Cases</a></li>
         <li><a class="nav-link" href="https://www.linkedin.com/in/deandraalvear/" style="padding-top: 10px; padding-bottom: 10px; padding-right: 10px;">LinkedIn</a></li>
-          </div>
       </ul>
-    </div>
+    </div>    
   </nav>
 </html>
   {% block content %}{% endblock %}
