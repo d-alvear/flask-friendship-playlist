@@ -122,8 +122,8 @@
   padding-left: 30px;
 }
 
-.flex-container {
-  display: inline-block;
+.inline-container-tracks {
+  display: flex;
   padding-left: 0px;
 }
 

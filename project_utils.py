@@ -88,18 +88,18 @@ def extract_features(track_list):
 #============================= Librosa Utils ==================================#
 def get_mp3(track_dict):
 	'''A function that takes an mp3 url, and writes it to the local
-		directory "audio-files"'''
+		directory "/tmp"'''
 	for track_id, properties in track_dict.items():
 		try:
 			doc = requests.get(properties[0])
-			with open(f'audio-files/track_{track_id}.wav', 'wb') as f:
+			with open(f'/tmp/track_{track_id}.wav', 'wb') as f:
 				f.write(doc.content)
 		except:
 			pass 
 
 def librosa_pipeline(track_id):
 	
-	path = f'audio-files/track_{track_id}.wav'
+	path = f'/tmp/track_{track_id}.wav'
 
 	d = {}
 	d['track_id'] = track_id
