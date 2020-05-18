@@ -122,6 +122,11 @@
   padding-left: 30px;
 }
 
+.flex-container {
+  display: inline-block;
+  padding-left: 0px;
+}
+
 .modebar-container {
   display: none;
 }
