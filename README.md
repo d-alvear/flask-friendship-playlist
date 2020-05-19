@@ -1,27 +1,15 @@
-Flask / Python Spotify Sample
+Friendshipify
 ======================================================
 
-Click `"Show"` in the header to see your app live. Updates to your code will instantly deploy and update live.
-
-Getting Started
-------------
-
-1. Get a client ID and secret from [the Spotify for Developers Dashboard](https://beta.developer.spotify.com/dashboard).
-2. Remix this project by editing it or by selecting the remix option in the top left dropdown menu.
-3. Paste your Client ID and Secret into the `.env` file.
-4. Click **Show Live**!
-
-About the Project
-------------
-
-On the back-end,
-- your app starts at `server.py`
-- add frameworks and packages in `requirements.txt`
-- safely store app secrets in `.env`
-
-On the front-end,
-- edit `client.js`, `style.css` and `index.html`
-- drag in `assets`, like images or music, to add them to your project
+Friendshipify is a multi-user song recommender that generates a playlist based on the intersection of two users' music tastes.
+This app was built using Flask and deployed using the standard environment of Google Cloud's App Engine.
 
 
-Remixed from '[flask-hello-world]()' by Kenneth Reitz
+![img](img/app_home.PNG)
+
+Contents:
+- Dependencies in `requirements.txt`
+- Deployed using Google App Engine; settings in `app.yaml`
+- Flask application: `server.py`
+- App functions: `project_utils.py`
+- `genre_replace.py` is a dictionary that maps Spotify's unique genres to more generalized genres
