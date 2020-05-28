@@ -20,6 +20,7 @@ conn = pg.connect(database=sql_credentials['database'],
                   password=sql_credentials['password'],
                   host=sql_credentials['host'])
 
+
 # Authenticate with Spotify using the Client Credentials flow
 client_credentials_manager = spotipy.SpotifyClientCredentials(client_id=spotify_credentials['client_id'],
 													  client_secret=spotify_credentials['client_secret'])

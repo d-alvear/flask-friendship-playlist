@@ -7,32 +7,40 @@
   <body>
     <div class="body-container">
     <header>
-      <h1>
+      <h1 style="text-align:center">
         Friendshipify
       </h1>
-      <h4>
-        A playlist generator for friends, find songs you'll both like!
-      </h4>
+      <h4 style="text-align:center">
+        A playlist generator for friends</h4>
     </header>
     <main>
-      <p>Input songs using the following format, using <b>semicolons between songs</b>:<br>
-      <i>Bohemian Rhapsody, Queen; Heartbreak Hotel, Elvis; Toxic, Britney Spears</i></p>
-      <p>
+      <p style="text-align: justify;">Friendshipify helps friends with different tastes in music find songs they'll both like. Rather than 
+        manually making a playlist that's a mix of each person's favorite songs, Friendshipify analyzes the 
+        songs submitted by each friend, finds the similarities between them, and generates a playlist based on the 
+        musical similarities it found.</p>
+      <p>For each friend, fill out a field below with three songs using the following format:<br>
+      <blockquote class="index_quote">Bohemian Rhapsody, Queen; Heartbreak Hotel, Elvis; Toxic, Britney Spears</blockquote></p>
+      <p>using <b>semicolons between songs.</b></p>
+      <p></p>
         <form>
            <label>Or Try a Demo: </label><br>
-           <input type="radio" name="input3" value="popVsRock" onchange="autoFill(value)">Pop vs. Rock
-           <input type="radio" name="input3" value="rockVsHiphop" onchange="autoFill(value)">Rock vs. Hip Hop
-           <input type="radio" name="input3" value="mixedGenres" onchange="autoFill(value)">Mixed Genres<br>
+           <div style="display: inline-flex;">
+           <div style="padding-right: 10px;"><input type="radio" name="input3" value="popVsRock" onchange="autoFill(value)">Pop vs. Rock</div>
+           <div style="padding-right: 10px;"><input type="radio" name="input3" value="rockVsHiphop" onchange="autoFill(value)">Rock vs. Hip Hop</div>
+           <div style="padding-right: 10px;"><input type="radio" name="input3" value="mixedGenres" onchange="autoFill(value)">Mixed Genres<br></div>
+           </div>
         </form><br>
       
         <form method="POST" action='results' >
-          <input name ="query_a" required type="text" maxlength="8000" placeholder="Friend 1" style="height: 30px; width: 500px;">
+          <input name ="query_a" required type="text" maxlength="8000" placeholder="Friend 1" style="height: 30px; width: 600px;">
           <p></p>
           <form method="POST" action='results' >
-          <input name ="query_b" required type="text" maxlength="8000" placeholder="Friend 2" style="height: 30px; width: 500px;">
+          <input name ="query_b" required type="text" maxlength="8000" placeholder="Friend 2" style="height: 30px; width: 600px;">
           <p></p>
-          <span class="input-group-btn">
-          <button class="btn btn-powder-green" onclick="window.location.href='{{playlist}}'" type="submit">Submit</button>
+          <!-- <span class="input-group-btn"> -->
+          <div style="text-align: center;">
+            <button class="btn" onclick="window.location.href='{{playlist}}'" type="submit">Submit</button>
+          </div>
           </div>
         </form>
     

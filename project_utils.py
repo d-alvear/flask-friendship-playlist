@@ -591,9 +591,10 @@ def generate_plot(combined):
 							))
 
 	fig.update_traces(box_visible=True, meanline_visible=True)
-	fig.update_layout(title={'text': "Comparison of Audio Features",'yanchor':'middle','x':0.43},
+	fig.update_layout(title={'text': "Comparison of Audio Features",'yanchor':'middle','x':0.52},
 					  	 		xaxis_title="Audio Features",yaxis_title="Normalized Feature Values",violinmode='group',font=dict(size=12),
-					  	 		autosize=False,width=900,height=400,margin=dict(l=50,r=10,b=10,t=40,pad=1))
+					  	 		autosize=False,width=700,height=400,margin=dict(l=50,r=10,b=10,t=40,pad=1),
+								legend={'orientation': "h",'y':-0.2,'x':0.22})
 
 	return plot(fig,output_type='div')
 

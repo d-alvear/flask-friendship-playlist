@@ -1,78 +1,3 @@
-/* styles */
-/* called by your view template */
-
-/* CircularStd @font-face kit */
-/* @font-face {
-  font-family: "CircularStd";
-  src: url("../fonts/CircularStd-Black.eot");
-  src: url("../fonts/CircularStd-Black.eot?#iefix") format("embedded-opentype"), url("../fonts/CircularStd-Black.woff") format("woff"), url("../fonts/CircularStd-Black.ttf") format("truetype"), url("../fonts/CircularStd-Black.svg#bcc26993292869431e54c666aafa8fcd") format("svg");
-  font-weight: 800;
-  font-style: normal;
-}
-@font-face {
-  font-family: "CircularStd";
-  src: url("../fonts/CircularStd-BlackItalic.eot");
-  src: url("../fonts/CircularStd-BlackItalic.eot?#iefix") format("embedded-opentype"), url("../fonts/CircularStd-BlackItalic.woff") format("woff"), url("../fonts/CircularStd-BlackItalic.ttf") format("truetype"), url("../fonts/CircularStd-BlackItalic.svg#bcc26993292869431e54c666aafa8fcd") format("svg");
-  font-weight: 800;
-  font-style: italic;
-}
-@font-face {
-  font-family: "CircularStd";
-  src: url("../fonts/CircularStd-Bold.eot");
-  src: url("../fonts/CircularStd-Bold.eot?#iefix") format("embedded-opentype"), url("../fonts/CircularStd-Bold.woff") format("woff"), url("../fonts/CircularStd-Bold.ttf") format("truetype"), url("../fonts/CircularStd-Bold.svg#bcc26993292869431e54c666aafa8fcd") format("svg");
-  font-weight: 600;
-  font-style: normal;
-}
-@font-face {
-  font-family: "CircularStd";
-  src: url("../fonts/CircularStd-BoldItalic.eot");
-  src: url("../fonts/CircularStd-BoldItalic.eot?#iefix") format("embedded-opentype");
-  src: url("../fonts/CircularStd-BoldItalic.woff") format("woff");
-  src: url("../fonts/CircularStd-BoldItalic.ttf") format("truetype");
-  src: url("../fonts/CircularStd-BoldItalic.svg#bcc26993292869431e54c666aafa8fcd") format("svg");
-  font-weight: 600;
-  font-style: italic;
-}
-@font-face {
-  font-family: "CircularStd";
-  src: url("../fonts/CircularStd-Medium.eot");
-  src: url("../fonts/CircularStd-Medium.eot?#iefix") format("embedded-opentype");
-  src: url("../fonts/CircularStd-Medium.woff") format("woff");
-  src: url("../fonts/CircularStd-Medium.ttf") format("truetype");
-  src: url("../fonts/CircularStd-Medium.svg#bcc26993292869431e54c666aafa8fcd") format("svg");
-  font-weight: 500;
-  font-style: normal;
-}
-@font-face {
-  font-family: "CircularStd";
-  src: url("../fonts/CircularStd-MediumItalic.eot");
-  src: url("../fonts/CircularStd-MediumItalic.eot?#iefix") format("embedded-opentype");
-  src: url("../fonts/CircularStd-MediumItalic.woff") format("woff");
-  src: url("../fonts/CircularStd-MediumItalic.ttf") format("truetype");
-  src: url("../fonts/CircularStd-MediumItalic.svg#bcc26993292869431e54c666aafa8fcd") format("svg");
-  font-weight: 500;
-  font-style: italic;
-}
-@font-face {
-  font-family: "CircularStd";
-  src: url("../fonts/CircularStd-Book.eot");
-  src: url("../fonts/CircularStd-Book.eot?#iefix") format("embedded-opentype");
-  src: url("../fonts/CircularStd-Book.woff") format("woff");
-  src: url("../fonts/CircularStd-Book.ttf") format("truetype");
-  src: url("../fonts/CircularStd-Book.svg#bcc26993292869431e54c666aafa8fcd") format("svg");
-  font-weight: 400;
-  font-style: normal;
-}
-@font-face {
-  font-family: "CircularStd";
-  src: url("../fonts/CircularStd-BookItalic.eot");
-  src: url("../fonts/CircularStd-BookItalic.eot?#iefix") format("embedded-opentype");
-  src: url("../fonts/CircularStd-BookItalic.woff") format("woff");
-  src: url("../fonts/CircularStd-BookItalic.ttf") format("truetype");
-  src: url("../fonts/CircularStd-BookItalic.svg#bcc26993292869431e54c666aafa8fcd") format("svg");
-  font-weight: 400;
-  font-style: italic;
-} */
 
 * {
   box-sizing: border-box;
@@ -87,7 +12,48 @@
 
 /* container for main content block */
 .body-container {
-  padding: 4px 0px 0px 16px;
+  /* padding: 4px 0px 0px 16px; */
+  max-width: 600px;
+  margin: auto;
+}
+
+.about-container {
+  /* padding: 4px 0px 0px 16px; */
+  max-width: 700px;
+  margin: auto;
+}
+
+.result-container {
+  /* padding: 4px 0px 0px 16px; */
+  margin: auto;
+  width: 85%;
+}
+
+.table {
+  max-width: 95%;
+}
+
+.btn {
+  border-bottom-left-radius: 50px;
+  border-top-left-radius: 50px;
+  border-bottom-right-radius: 50px;
+  border-top-right-radius: 50px;
+  background-color:#c3f0c8 !important;
+}
+
+.index_quote {
+  font-size: 15px !important;
+  margin-top: 2px;
+  margin-bottom: 0px;
+  padding-left: 5px;
+  margin-left: 5px;
+  margin-right: 0px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.btn-container {
+  position:relative;
 }
 
 .plot-container-plotly {
@@ -95,7 +61,8 @@
 }
 
 .small-blockquote {
-  width: 750px;
+  width: 510px;
+  text-align: justify;
   margin-top: 2px;
   margin-bottom: 2px;
   margin-right: 5px;

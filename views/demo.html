@@ -5,280 +5,282 @@
 
 {% block content %}
 <body>
-<div class="body-container">
-<header>
-<h1>Demo Cases</h1>
-</header>
-<main>
-    <h2>Demo 1: Pop vs. Rock</h2>
-    <p style="width: 1200px;">Two friends, Donna and Jackie, both like different music. 
-        Jackie loves 2000s pop and Mariah Carey's early music. Donna 
-        prefers rock from the 90's to early 2000s. They decide to see
-        what songs Friendshipify would recommend to them.
-    </p>
-    <span class="inline-container-tracks">
-        <h4 class="left-user-header user-header" style="width: 110px;"><b>Jackie's Pop Songs:</b></h4>
-            <ul class="user-list">
-                <li>Bad Romance, Lady Gaga</li>
-                <li>Fantasy, Mariah Carey</li>
-                <li>Cry Me a River, Justin Timberlake</li>
-            </ul>
-        <h4 class="middle-user-header user-header" style="margin-left: 20px;"><b>Donna's Rock Songs:</b></h4>
-            <ul class="user-list">
-                <li>Smells Like Teen Spirit, Nirvana</li>
-                <li>Island In the Sun, Weezer</li>
-                <li>Never Let You Go, Third Eye Blind</li>
-            </ul>
-        <h4 class="right-user-header user-header"><b>Results:</b></h4>
-        <ul class="user-list">
-            <li>The Chamber, Lenny Kravitz, pop</li>
-            <li>Beverly Hills, Weezer, rock</li>
-            <li>Semi-Charmed Life, Third Eye Blind, rock</li>
-            <li>My Wave, Soundgarden, rock</li>
-            <li>MMMBop, Hanson, pop</li>
-            <li>Still Got Me, Daniel Merriweather, pop</li>
-            <li>Good In Goodbye, Madison Beer, pop</li>
-        </ul>
-    </span>
-    <h3 style="margin-top: 8px; margin-bottom: 8px;">Results</h3>
-    <div class="row">
-        <div class="columns">
-            <!-- <span> -->
-                {{ div_placeholder_1 }}
-            <!-- </span> -->
-        </div>
-        <div class="columns">
-            <h4 style="margin-bottom: 5px;"><b>Plot Features:</b></h4>
-            <p style="margin-bottom: 7px;">From the <a target="_blank" rel="noopener noreferrer" href="https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/">Spotify API Docs</a></p>
-            <blockquote class="small-blockquote">
-                <ul style="padding-left: 20px; width: 520px;">
-                    <li class="blockquote-li"><b>Danceability</b>: how suitable a track is for dancing based on a combination of tempo, rhythm stability, beat strength
-                        and overall regularity. A value of 0.0 is least danceable, and 1.0 is most danceable.
-                    </li>
-                    <li class="blockquote-li"><b>Energy</b>: a measure from 0.0 to 1.0 and represents a perceptual measure of intensity and activity. Typically, energetic 
-                        tracks feel fast, loud, and noisy. For example, death metal has high energy, while a Bach prelude scores low on the scale. </li>
-                    <li class="blockquote-li"><b>Tempo</b>: the overall estimated tempo of a track in beats per minute (BPM). In musical terminology, tempo is the speed or pace 
-                        of a given piece and derives directly from the average beat duration. </li>
-                    <li class="blockquote-li"><b>Valence</b>: a measure from 0.0 to 1.0 describing the musical positiveness conveyed by a track. Tracks with high valence sound 
-                        more positive (e.g. happy, cheerful, euphoric), while tracks with low valence sound more negative (e.g. sad, depressed, angry).</li>
+    <header>
+        <h1 style="text-align: center;">Demo Cases</h1>
+    </header>
+    <main>
+        <div class="result-container">
+            <h2>Demo 1: Pop vs. Rock</h2>
+            <p style="width: 1200px; text-align: justify;">Two friends, Donna and Jackie, both like different music. 
+                Jackie loves 2000s pop and Mariah Carey's early music. Donna 
+                prefers rock from the 90's to early 2000s. They decide to see
+                what songs Friendshipify would recommend to them.
+            </p>
+            <span class="inline-container-tracks">
+                <h4 class="left-user-header user-header" style="width: 110px;"><b>Jackie's Pop Songs:</b></h4>
+                    <ul class="user-list">
+                        <li>Bad Romance, Lady Gaga</li>
+                        <li>Fantasy, Mariah Carey</li>
+                        <li>Cry Me a River, Justin Timberlake</li>
+                    </ul>
+                <h4 class="middle-user-header user-header" style="margin-left: 20px;"><b>Donna's Rock Songs:</b></h4>
+                    <ul class="user-list">
+                        <li>Smells Like Teen Spirit, Nirvana</li>
+                        <li>Island In the Sun, Weezer</li>
+                        <li>Never Let You Go, Third Eye Blind</li>
+                    </ul>
+                <h4 class="right-user-header user-header"><b>Results:</b></h4>
+                <ul class="user-list">
+                    <li>The Chamber, Lenny Kravitz, pop</li>
+                    <li>Beverly Hills, Weezer, rock</li>
+                    <li>Semi-Charmed Life, Third Eye Blind, rock</li>
+                    <li>My Wave, Soundgarden, rock</li>
+                    <li>MMMBop, Hanson, pop</li>
+                    <li>Still Got Me, Daniel Merriweather, pop</li>
+                    <li>Good In Goodbye, Madison Beer, pop</li>
                 </ul>
-            </blockquote>
+            </span>
+            <h3 style="margin-top: 8px; margin-bottom: 8px;">Results</h3>
+            <div class="row">
+                <div class="columns">
+                    <!-- <span> -->
+                        {{ div_placeholder_1 }}
+                    <!-- </span> -->
+                </div>
+                <div class="columns">
+                    <h4 style="margin-bottom: 5px;"><b>Plot Features:</b></h4>
+                    <p style="margin-bottom: 7px;">From the <a target="_blank" rel="noopener noreferrer" href="https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/">Spotify API Docs</a></p>
+                    <blockquote class="small-blockquote">
+                        <ul style="padding-left: 20px; width: 520px;">
+                            <li class="blockquote-li"><b>Danceability</b>: how suitable a track is for dancing based on a combination of tempo, rhythm stability, beat strength
+                                and overall regularity. A value of 0.0 is least danceable, and 1.0 is most danceable.
+                            </li>
+                            <li class="blockquote-li"><b>Energy</b>: a measure from 0.0 to 1.0 and represents a perceptual measure of intensity and activity. Typically, energetic 
+                                tracks feel fast, loud, and noisy. For example, death metal has high energy, while a Bach prelude scores low on the scale. </li>
+                            <li class="blockquote-li"><b>Tempo</b>: the overall estimated tempo of a track in beats per minute (BPM). In musical terminology, tempo is the speed or pace 
+                                of a given piece and derives directly from the average beat duration. </li>
+                            <li class="blockquote-li"><b>Valence</b>: a measure from 0.0 to 1.0 describing the musical positiveness conveyed by a track. Tracks with high valence sound 
+                                more positive (e.g. happy, cheerful, euphoric), while tracks with low valence sound more negative (e.g. sad, depressed, angry).</li>
+                        </ul>
+                    </blockquote>
+                </div>
+            </div>
+        
+            <div class="row">
+                <div class="columns">
+                    <h4><b>Plot Explanation:</b></h4>
+                        <p style="width: 620px; text-align: justify;">This grouped violin plot compares the audio features of Jackie and Donna's songs. The box plot inside the violin shows how the features of 
+                            both friends' songs are distributed, while the curve of the violin represents the probability of all songs in the genre taking on the associated feature value.
+                            In other words, if Jackie and Donna each picked a fourth song, there is a higher probability their fourth song will take on a value where the violin is widest,
+                            and a lower probability of their song having a value where the violin is the skinniest. These probabilities can be seen by hovering over the violin and 
+                            seeing how the <b>kernel density estimate (kde)</b> changes as you move along the violin.
+                        </p>
+                        <p style="width: 620px; text-align: justify;">Jackie's pop songs have a lower tempo, are moderately danceable, have varied energy, and are moderately positive. All Donna's rock songs 
+                            appear to have the same low tempo, are less danceable than Jackie's pop songs, have high energy and are moderately positive.
+                        </p>
+                        <p style="width: 620px; text-align: justify;">The distribution of values for the songs recommended by Friendshipify appear to visually match the distributions of Jackie and Donna's songs.
+                            The recommended songs have the same low tempo as Jackie and Donna's songs, as well as the varied positiveness. The energy values of the recommendations seem to encompass
+                            the range of values seen in both friends' songs. However, there is a higher probability of Friendshipify recommending high energy songs like Donna's. The danceability values
+                            of the recommendations is interesting due to the inclusion of two extreme values of 0.88 and 0.51, despite the rest of the songs falling within the mean danceability values 
+                            for both Jackie and Donna. Friendshipify could be including these extreme values to address the 50% probability of Jackie's next song having a danceability value of 0.88 or the
+                            fact that one of Donna's songs has a danceability value of 0.51.  
+                        </p>
+                </div>
+                <div class="columns">  
+                    <p style="width: 620px; margin-top: 46.5px; text-align: justify;">Despite the differences in danceability, the results seem to be good ones based on the plotted features. I feel that the songs audibly match. Lenny Kravitz's
+                        "The Chamber" sounds very pop/rock, so I feel that its a song that would appeal to both Jackie and Donna. "MMMBop" matches the era of both Jackie and Donna's picks and sounds similar to Third Eye Blind's 
+                        "Never Let You Go" and "Semi-Charmed Life", the latter being recommended from Donna's songs. "Good In Goodbye" is being recommended from Jackie's picks and sounds very similar to 
+                        Justin Timberlake's "Cry Me A River." 
+                    </p>
+                </div>
+            </div>
+            <br></br>
         </div>
-    </div>
-    <div class="row">
-        <div class="columns">
-            <h4><b>Plot Explanation:</b></h4>
-                <p style="width: 620px;">This grouped violin plot compares the audio features of Jackie and Donna's songs. The box plot inside the violin shows how the features of 
-                    both friends' songs are distributed, while the curve of the violin represents the probability of all songs in the genre taking on the associated feature value.
-                    In other words, if Jackie and Donna each picked a fourth song, there is a higher probability their fourth song will take on a value where the violin is widest,
-                    and a lower probability of their song having a value where the violin is the skinniest. These probabilities can be seen by hovering over the violin and 
-                    seeing how the <b>kernel density estimate (kde)</b> changes as you move along the violin.
-                </p>
-                <p style="width: 620px;">Jackie's pop songs have a lower tempo, are moderately danceable, have varied energy, and are moderately positive. All Donna's rock songs 
-                    appear to have the same low tempo, are less danceable than Jackie's pop songs, have high energy and are moderately positive.
-                </p>
-                <p style="width: 620px;">The distribution of values for the songs recommended by Friendshipify appear to visually match the distributions of Jackie and Donna's songs.
-                    The recommended songs have the same low tempo as Jackie and Donna's songs, as well as the varied positiveness. The energy values of the recommendations seem to encompass
-                    the range of values seen in both friends' songs. However, there is a higher probability of Friendshipify recommending high energy songs like Donna's. The danceability values
-                    of the recommendations is interesting due to the inclusion of two extreme values of 0.88 and 0.51, despite the rest of the songs falling within the mean danceability values 
-                    for both Jackie and Donna. Friendshipify could be including these extreme values to address the 50% probability of Jackie's next song having a danceability value of 0.88 or the
-                    fact that one of Donna's songs has a danceability value of 0.51.  
-                </p>
-        </div>
-        <div class="columns">  
-                <p style="width: 620px; margin-top: 43px;">Despite the differences in danceability, the results seem to be good ones based on the plotted features. I feel that the songs audibly match. Lenny Kravitz's
-                    "The Chamber" sounds very pop/rock, so I feel that its a song that would appeal to both Jackie and Donna. "MMMBop" matches the era of both Jackie and Donna's picks and sounds similar to Third Eye Blind's 
-                    "Never Let You Go" and "Semi-Charmed Life", the latter being recommended from Donna's songs. "Good In Goodbye" is being recommended from Jackie's picks and sounds very similar to 
-                    Justin Timberlake's "Cry Me A River." 
-                </p>
-        </div>
-    </div>
-    <br></br>
 
-    <h2>Demo 2: Rock vs. Hip Hop</h2>
-    <p style="width: 1200px;">Donna and Jackie's friend Hyde also likes the same kind of rock music as Donna. 
-         They ask their friend Fez what kind of music he likes. He likes hip hop and 
-         his two favorite groups are OutKast and TLC. Fez also thought Drake's 
-         song "In My Feelings" was pretty catchy when it came out. Rock and hip hop
-         are very distinct genres, so Hyde and Fez see what kinds of songs Friendshipify
-         recommends to them.
-    </p>
+        <div class="result-container">
+            <h2>Demo 2: Rock vs. Hip Hop</h2>
+            <p style="width: 1200px; text-align: justify;">Donna and Jackie's friend Hyde also likes the same kind of rock music as Donna. 
+                They ask their friend Fez what kind of music he likes. He likes hip hop and 
+                his two favorite groups are OutKast and TLC. Fez also thought Drake's 
+                song "In My Feelings" was pretty catchy when it came out. Rock and hip hop
+                are very distinct genres, so Hyde and Fez see what kinds of songs Friendshipify
+                recommends to them.
+            </p>
 
-    <span class="inline-container-tracks">
-        <h4 class="left-user-header user-header" style="width: 110px;"><b>Hyde's Rock Songs:</b></h4>
-        <ul class="user-list" style="width: 300px;">
-            <li>The Middle, Jimmy Eat World</li>
-            <li>Mr. Brightside, The Killers</li>
-            <li>Californication, Red Hot Chili Peppers</li>
-        </ul>
-        <h4 class="middle-user-header user-header" style="margin-left: 20px;"><b>Fez's Hip Hop Songs:</b></h4>
-        <ul class="user-list" style="width: 180px;">
-            <li>Hey Ya, OutKast</li>
-            <li>In My Feelings, Drake</li>
-            <li>Waterfalls, TLC</li>
-        </ul>
-        <h4 class="right-user-header user-header"><b>Results:</b></h4>
-        <ul class="user-list" style="width: 340px;">
-            <li>One Dance, Drake, hip hop</li>
-            <li>Hold Me Down, Motion City Soundtrack, rock</li>
-            <li>The Royal We, Silversun Pickups, rock</li>
-            <li>Tones Of Home, Blind Melon, rock</li>
-            <li>Three Is A Magic Number, Blind Melon, rock</li>
-            <li>Backyard, Kota the Friend, hip hop</li>
-            <li>Sucker M.C.'s, Run-D.M.C., hip hop</li>
-        </ul>
-    </span>
-    <h3 style="margin-top: 8px; margin-bottom: 8px;">Results</h3>
-    <div class="row">
-        <div class="columns">
-            {{ div_placeholder_2 }}
-        </div>
-        <div class="columns">
-            <h4 style="margin-bottom: 5px;"><b>Plot Features:</b></h4>
-            <p style="margin-bottom: 7px;">From the <a target="_blank" rel="noopener noreferrer" href="https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/">Spotify API Docs</a></p>
-            <blockquote class="small-blockquote">
-                <ul style="padding-left: 20px; width: 520px;">
-                    <li class="blockquote-li"><b>Danceability</b>: how suitable a track is for dancing based on a combination of tempo, rhythm stability, beat strength
-                        and overall regularity. A value of 0.0 is least danceable, and 1.0 is most danceable.
-                    </li>
-                    <li class="blockquote-li"><b>Energy</b>: a measure from 0.0 to 1.0 and represents a perceptual measure of intensity and activity. Typically, energetic 
-                        tracks feel fast, loud, and noisy. For example, death metal has high energy, while a Bach prelude scores low on the scale. </li>
-                    <li class="blockquote-li"><b>Tempo</b>: the overall estimated tempo of a track in beats per minute (BPM). In musical terminology, tempo is the speed or pace 
-                        of a given piece and derives directly from the average beat duration. </li>
-                    <li class="blockquote-li"><b>Valence</b>: a measure from 0.0 to 1.0 describing the musical positiveness conveyed by a track. Tracks with high valence sound 
-                        more positive (e.g. happy, cheerful, euphoric), while tracks with low valence sound more negative (e.g. sad, depressed, angry).</li>
+            <span class="inline-container-tracks">
+                <h4 class="left-user-header user-header" style="width: 110px;"><b>Hyde's Rock Songs:</b></h4>
+                <ul class="user-list" style="width: 300px;">
+                    <li>The Middle, Jimmy Eat World</li>
+                    <li>Mr. Brightside, The Killers</li>
+                    <li>Californication, Red Hot Chili Peppers</li>
                 </ul>
-            </blockquote>
-        </div>
-    </div>
-    <div class="row">
-        <div class="columns">
-            <h4><b>Plot Explanation:</b></h4>
-                <p style="width: 620px;">This grouped violin plot compares the audio features of Fez and Hyde's songs. The box plot inside the violin shows how the features of 
-                    both friends' songs are distributed, while the curve of the violin represents the probability of all songs in the genre taking on the associated feature value.
-                    In other words, if Hyde and Fez each picked a fourth song, there is a higher probability their fourth song will take on a value where the violin is widest,
-                    and a lower probability of their song having a value where the violin is the skinniest. These probabilities can be seen by hovering over the violin and 
-                    seeing how the <b>kernel density estimate (kde)</b> changes as you move along the violin.
-                </p>
-                <p style="width: 620px;">Hyde's rock songs are not moderately danceable and have high energy. This makes sense since "The Middle" and "Mr. Brightside" sound fast and energetic. 
-                    Despite the high energy, Hyde's danceability and tempo distributions are both being skewed by Californication, a more mellow song compared to his other two picks. Fez's 
-                    songs show opposite characteristics compared to Hyde's songs. Fez's danceability violin is centered close to 0.8, which means his songs are highly danceable. Despite being 
-                    danceable, the energy and tempo of Fez's songs are variable despite being their high danceability. OutKast's "Hey Ya" is very energetic, while "In My Feelings" is less so, 
-                    and "Waterfalls" being pretty slow and mellow. Both Hyde and Fez's picks have varied valence, which makes sense again considering their picks.
-                </p>
-                <p style="width: 620px;">The distribution of features for the songs recommended seem to favor either Hyde or Fez's songs. The danceability of the recommendations is being 
-                    skewed possibly by one or two songs that have a danceability value around 0.9. This is despite there being a higher probability of songs being recommended with a danceability
-                    value of 0.56. The energy and tempo distributions both contain outliers. These outliers could be recommended due to Hyde having one low tempo, low energy song amound high energy
-                    rock songs, and Fez's including one high energy, high tempo song among more mellow hip hop songs. Valence seems to be the one feature where the recommendations capture both friends'
-                    tastes; the songs recommended also have highly variable valence. 
-                </p>
-        </div>
-        <div class="columns">
-                <p style="width: 620px; margin-top: 45px;">The songs recommended to Hyde and Fez don't seem to cater to both of their tastes. Run-D.M.C's "Sucker M.C.'s" comes the closest due to the 
-                    percussive nature of the song, despite being a hip-hop. Recommending another mellow Drake song to Fez makes sense since he included a Drake song. The two Blind Melon songs are mellow as 
-                    well and Friendshipify could be attempting to match them on the characteristics of "In My Feelings" and "One Dance". 
-                </p>
-                <p style="width: 620px; margin-top: 4px;">If the purpose of Friendshipify was to make separate recommendations then the results would be good ones, however it seems that rock and hip hop 
-                    may be too different to recommend songs that capture both users' tastes. However, genres are not 100% one genre or another. If Fez and Hyde picked different songs the results may be
-                    more cohesive, especially if the both friends pick songs are not so variable.
-                </p>
-        </div>
-    </div>
-    <br></br>
-    <h2>Demo 3: Mixed Genres</h2>
-    <p style="width: 1200px;"> The four friends decide to ask their friends Eric and Kelso about the kind of music they like.
-        Eric likes indie songs while Kelso loves funk, Marvin Gaye is his favorite artist.
-        The group wonders what songs Friendshipify would give if they put in songs from all their favorite
-        genres. To make things interesting, Fez decides to put in an ABBA song and Donna changes her genre
-        to classic rock.
-    </p>
-    <span class="inline-container-tracks">
-        <h4 class="left-user-header user-header" style="width: 110px;"><b>Jackie, Fez, and Hyde's Songs:</b></h4>
-        <ul class="user-list" style="width: 280px;">
-            <li>Call Me Maybe, Carly Rae Jepsen</li>
-            <li>Dancing Queen, ABBA</li>
-            <li>All The Small Things, blink-182</li>
-        </ul>
-        <h4 class="middle-user-header user-header" style="margin-left: 20px;"><b>Eric, Kelso, and Donna's Songs:</b></h4>
-        <ul class="user-list" style="width: 250px;">
-            <li>Electric Feel, MGMT</li>
-            <li>Got To Give It Up, Marvin Gaye</li>
-            <li>Hotel California, Eagles</li>
-        </ul>
-        <h4 class="right-user-header user-header"><b>Results:</b></h4>
-        <ul class="user-list" style="width: 340px;">
-            <li>Post Malone, Sam Feldt, pop</li>
-            <li>Bad To You, Ariana Grande, pop</li>
-            <li>Blow Me, The Used, rock</li>
-            <li>Pretty Peggy, Wolfmother, rock</li>
-            <li>Fortunate Son, Creedence Clearwater Revival, classic rock</li>
-            <li>Walls, ROZES, indie</li>
-        </ul>
-    </span>
-    <h3 style="margin-top: 8px; margin-bottom: 8px;">Results</h3>
-    <div class="row">
-        <div class="columns">
-            <!-- <span> -->
-                {{ div_placeholder_3 }}
-            <!-- </span> -->
-        </div>
-        <div class="columns">
-            <h4 style="margin-bottom: 5px;"><b>Plot Features:</b></h4>
-            <p style="margin-bottom: 7px;">From the <a target="_blank" rel="noopener noreferrer" href="https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/">Spotify API Docs</a></p>
-            <blockquote class="small-blockquote">
-                <ul style="padding-left: 20px; width: 520px;">
-                    <li class="blockquote-li"><b>Danceability</b>: how suitable a track is for dancing based on a combination of tempo, rhythm stability, beat strength
-                        and overall regularity. A value of 0.0 is least danceable, and 1.0 is most danceable.
-                    </li>
-                    <li class="blockquote-li"><b>Energy</b>: a measure from 0.0 to 1.0 and represents a perceptual measure of intensity and activity. Typically, energetic 
-                        tracks feel fast, loud, and noisy. For example, death metal has high energy, while a Bach prelude scores low on the scale. </li>
-                    <li class="blockquote-li"><b>Tempo</b>: the overall estimated tempo of a track in beats per minute (BPM). In musical terminology, tempo is the speed or pace 
-                        of a given piece and derives directly from the average beat duration. </li>
-                    <li class="blockquote-li"><b>Valence</b>: a measure from 0.0 to 1.0 describing the musical positiveness conveyed by a track. Tracks with high valence sound 
-                        more positive (e.g. happy, cheerful, euphoric), while tracks with low valence sound more negative (e.g. sad, depressed, angry).</li>
+                <h4 class="middle-user-header user-header" style="margin-left: 20px;"><b>Fez's Hip Hop Songs:</b></h4>
+                <ul class="user-list" style="width: 180px;">
+                    <li>Hey Ya, OutKast</li>
+                    <li>In My Feelings, Drake</li>
+                    <li>Waterfalls, TLC</li>
                 </ul>
-            </blockquote>
+                <h4 class="right-user-header user-header"><b>Results:</b></h4>
+                <ul class="user-list" style="width: 340px;">
+                    <li>One Dance, Drake, hip hop</li>
+                    <li>Hold Me Down, Motion City Soundtrack, rock</li>
+                    <li>The Royal We, Silversun Pickups, rock</li>
+                    <li>Tones Of Home, Blind Melon, rock</li>
+                    <li>Three Is A Magic Number, Blind Melon, rock</li>
+                    <li>Backyard, Kota the Friend, hip hop</li>
+                    <li>Sucker M.C.'s, Run-D.M.C., hip hop</li>
+                </ul>
+            </span>
+            <h3 style="margin-top: 8px; margin-bottom: 8px;">Results</h3>
+            <div class="row">
+                <div class="columns">
+                    {{ div_placeholder_2 }}
+                </div>
+                <div class="columns">
+                    <h4 style="margin-bottom: 5px;"><b>Plot Features:</b></h4>
+                    <p style="margin-bottom: 7px;">From the <a target="_blank" rel="noopener noreferrer" href="https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/">Spotify API Docs</a></p>
+                    <blockquote class="small-blockquote">
+                        <ul style="padding-left: 20px; width: 520px;">
+                            <li class="blockquote-li"><b>Danceability</b>: how suitable a track is for dancing based on a combination of tempo, rhythm stability, beat strength
+                                and overall regularity. A value of 0.0 is least danceable, and 1.0 is most danceable.
+                            </li>
+                            <li class="blockquote-li"><b>Energy</b>: a measure from 0.0 to 1.0 and represents a perceptual measure of intensity and activity. Typically, energetic 
+                                tracks feel fast, loud, and noisy. For example, death metal has high energy, while a Bach prelude scores low on the scale. </li>
+                            <li class="blockquote-li"><b>Tempo</b>: the overall estimated tempo of a track in beats per minute (BPM). In musical terminology, tempo is the speed or pace 
+                                of a given piece and derives directly from the average beat duration. </li>
+                            <li class="blockquote-li"><b>Valence</b>: a measure from 0.0 to 1.0 describing the musical positiveness conveyed by a track. Tracks with high valence sound 
+                                more positive (e.g. happy, cheerful, euphoric), while tracks with low valence sound more negative (e.g. sad, depressed, angry).</li>
+                        </ul>
+                    </blockquote>
+                </div>
+            </div>
+            <div class="row">
+                <div class="columns">
+                    <h4><b>Plot Explanation:</b></h4>
+                        <p style="width: 620px; text-align: justify;">This grouped violin plot compares the audio features of Fez and Hyde's songs. The box plot inside the violin shows how the features of 
+                            both friends' songs are distributed, while the curve of the violin represents the probability of all songs in the genre taking on the associated feature value.
+                            In other words, if Hyde and Fez each picked a fourth song, there is a higher probability their fourth song will take on a value where the violin is widest,
+                            and a lower probability of their song having a value where the violin is the skinniest. These probabilities can be seen by hovering over the violin and 
+                            seeing how the <b>kernel density estimate (kde)</b> changes as you move along the violin.
+                        </p>
+                        <p style="width: 620px; text-align: justify;">Hyde's rock songs are not moderately danceable and have high energy. This makes sense since "The Middle" and "Mr. Brightside" sound fast and energetic. 
+                            Despite the high energy, Hyde's danceability and tempo distributions are both being skewed by Californication, a more mellow song compared to his other two picks. Fez's 
+                            songs show opposite characteristics compared to Hyde's songs. Fez's danceability violin is centered close to 0.8, which means his songs are highly danceable. Despite being 
+                            danceable, the energy and tempo of Fez's songs are variable despite being their high danceability. OutKast's "Hey Ya" is very energetic, while "In My Feelings" is less so, 
+                            and "Waterfalls" being pretty slow and mellow. Both Hyde and Fez's picks have varied valence, which makes sense again considering their picks.
+                        </p>
+                        <p style="width: 620px; text-align: justify;">The distribution of features for the songs recommended seem to favor either Hyde or Fez's songs. The danceability of the recommendations is being 
+                            skewed possibly by one or two songs that have a danceability value around 0.9. This is despite there being a higher probability of songs being recommended with a danceability
+                            value of 0.56. The energy and tempo distributions both contain outliers. These outliers could be recommended due to Hyde having one low tempo, low energy song amound high energy
+                            rock songs, and Fez's including one high energy, high tempo song among more mellow hip hop songs. Valence seems to be the one feature where the recommendations capture both friends'
+                            tastes; the songs recommended also have highly variable valence. 
+                        </p>
+                </div>
+                <div class="columns">
+                        <p style="width: 620px; margin-top: 45.5px; text-align: justify;">The songs recommended to Hyde and Fez don't seem to cater to both of their tastes. Run-D.M.C's "Sucker M.C.'s" comes the closest due to the 
+                            percussive nature of the song, despite being a hip-hop. Recommending another mellow Drake song to Fez makes sense since he included a Drake song. The two Blind Melon songs are mellow as 
+                            well and Friendshipify could be attempting to match them on the characteristics of "In My Feelings" and "One Dance". 
+                        </p>
+                        <p style="width: 620px; margin-top: 4px; text-align: justify;">If the purpose of Friendshipify was to make separate recommendations then the results would be good ones, however it seems that rock and hip hop 
+                            may be too different to recommend songs that capture both users' tastes. However, genres are not 100% one genre or another. If Fez and Hyde picked different songs the results may be
+                            more cohesive, especially if the both friends pick songs are not so variable.
+                        </p>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="columns">
-            <h4><b>Plot Explanation:</b></h4>
-                <p style="width: 620px;">This grouped violin plot compares the audio features of each group's songs. The box plot inside the violin shows how the features of 
-                    both friends' songs are distributed, while the curve of the violin represents the probability of all songs in the genre taking on the associated feature value.
-                    In other words, if each group of friends picked a fourth song, there is a higher probability their fourth song will take on a value where the violin is widest,
-                    and a lower probability of their song having a value where the violin is the skinniest. These probabilities can be seen by hovering over the violin and 
-                    seeing how the <b>kernel density estimate (kde)</b> changes as you move along the violin.
-                </p>
-                <p style="width: 620px;">Jackie, Fez, and Hyde's songs show variability in the danceability and energy violins. Their songs are not very danceable but have moderate energy.
-                    The tempo of their songs show some variability as well but are centered around moderate tempo values. Valence is the feature where Jackie, Fez, and Hyde's songs show the
-                    least variability. The valence of their songs is clustered around 0.6 and 0.7, which means their songs are moderately cheerful. Eric, Kelso, and Donna's songs also show
-                    variability in their danceability and energy. However, they are slightly more danceable and slightly less energetic than the other group's songs. The tempo of their songs
-                    are in the same range as Jackie, Fez, and Hyde's songs. The two groups show the most difference in the valence of their songs. Eric, Kelso, and Donna's songs are more 
-                    variable in their cheerfulness.
-                </p>
-                <p style="width: 620px;">The shape of the violins for the recommended songs are tall, which implies variable audio features for the songs picked by Friendshipify. This makes 
-                    sense since each group's chosen songs also had variable audio features. The recommendations seem to be moderately danceable and have moderate energy. The tempo of the
-                    recommendations appears to be slightly more variable than the tempo of each group's songs. Valence of the recommendations seems to have been skewed by the variability of
-                    Eric, Kelso, and Donna's songs. The recommended songs also have lower valence, which means they sound less cheerful. This is an interesting result since Jackie, Fez,
-                    and Hyde's songs are very cheerful and centered around 0.70; Eric, Kelso, and Donna's songs are moderately cheerful, with a minimum value of 0.56. Despite
-                    these moderate to highly cheerful songs, the songs recommended have a minimum valence of 0.35 and a maximum valence of 0.67.
-                </p>
-        </div>
-        <div class="columns">
-                <p style="width: 620px; margin-top: 45px;">Jackie's pick, "Call Me Maybe", and Eric's pick, "Electric Feel", seem to have had the biggest influence on the songs recommended 
-                    by Friendshipify. Both songs sound similar to "Post Malone", "Bad To You", and "Walls." Friendshipify recommending "Fortunate Son" was most likely a match on the energy of 
-                    Hyde's pick, "All The Small Things" and Donna's classic rock pick, "Hotel California." The songs "Blow Me" and "Pretty Peggy" seem to be odd selections compared to the other
-                    songs recommended. However, "Pretty Peggy" matches the mellowness of "Hotel California", and the loud energy of "Blow Me" is similar to "All The Small Things." Recommendations
-                    based on Kelso's pick, "Got To Give It Up", and Fez's pick, "Dancing Queen", seem to have been excluded. Some of the friends may enjoy the resulting playlist more than others.
-                    Since the songs provided all come from different genres, the resulting songs are also variable. 
-                </p>
-            <!-- <p> The leftmost violin group shows the distribution of danceability values among the 
-                two genres and the resulting songs. Pop songs (purple) 
-            </p> -->
-        </div>
-    </div>
 
-</main>
-</div>
+        <div class="result-container">
+            <h2>Demo 3: Mixed Genres</h2>
+                <p style="width: 1200px; text-align: justify;"> The four friends decide to ask their friends Eric and Kelso about the kind of music they like.
+                    Eric likes indie songs while Kelso loves funk, Marvin Gaye is his favorite artist.
+                    The group wonders what songs Friendshipify would give if they put in songs from all their favorite
+                    genres. To make things interesting, Fez decides to put in an ABBA song and Donna changes her genre
+                    to classic rock.
+                </p>
+            <span class="inline-container-tracks">
+                <h4 class="left-user-header user-header" style="width: 110px;"><b>Jackie, Fez, and Hyde's Songs:</b></h4>
+                <ul class="user-list" style="width: 280px;">
+                    <li>Call Me Maybe, Carly Rae Jepsen</li>
+                    <li>Dancing Queen, ABBA</li>
+                    <li>All The Small Things, blink-182</li>
+                </ul>
+                <h4 class="middle-user-header user-header" style="margin-left: 20px;"><b>Eric, Kelso, and Donna's Songs:</b></h4>
+                <ul class="user-list" style="width: 250px;">
+                    <li>Electric Feel, MGMT</li>
+                    <li>Got To Give It Up, Marvin Gaye</li>
+                    <li>Hotel California, Eagles</li>
+                </ul>
+                <h4 class="right-user-header user-header"><b>Results:</b></h4>
+                <ul class="user-list" style="width: 340px;">
+                    <li>Post Malone, Sam Feldt, pop</li>
+                    <li>Bad To You, Ariana Grande, pop</li>
+                    <li>Blow Me, The Used, rock</li>
+                    <li>Pretty Peggy, Wolfmother, rock</li>
+                    <li>Fortunate Son, Creedence Clearwater Revival, classic rock</li>
+                    <li>Walls, ROZES, indie</li>
+                </ul>
+            </span>
+            <h3 style="margin-top: 8px; margin-bottom: 8px;">Results</h3>
+            <div class="row">
+                <div class="columns">
+                    <!-- <span> -->
+                        {{ div_placeholder_3 }}
+                    <!-- </span> -->
+                </div>
+                <div class="columns">
+                    <h4 style="margin-bottom: 5px;"><b>Plot Features:</b></h4>
+                    <p style="margin-bottom: 7px;">From the <a target="_blank" rel="noopener noreferrer" href="https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/">Spotify API Docs</a></p>
+                    <blockquote class="small-blockquote">
+                        <ul style="padding-left: 20px; width: 520px;">
+                            <li class="blockquote-li"><b>Danceability</b>: how suitable a track is for dancing based on a combination of tempo, rhythm stability, beat strength
+                                and overall regularity. A value of 0.0 is least danceable, and 1.0 is most danceable.
+                            </li>
+                            <li class="blockquote-li"><b>Energy</b>: a measure from 0.0 to 1.0 and represents a perceptual measure of intensity and activity. Typically, energetic 
+                                tracks feel fast, loud, and noisy. For example, death metal has high energy, while a Bach prelude scores low on the scale. </li>
+                            <li class="blockquote-li"><b>Tempo</b>: the overall estimated tempo of a track in beats per minute (BPM). In musical terminology, tempo is the speed or pace 
+                                of a given piece and derives directly from the average beat duration. </li>
+                            <li class="blockquote-li"><b>Valence</b>: a measure from 0.0 to 1.0 describing the musical positiveness conveyed by a track. Tracks with high valence sound 
+                                more positive (e.g. happy, cheerful, euphoric), while tracks with low valence sound more negative (e.g. sad, depressed, angry).</li>
+                        </ul>
+                    </blockquote>
+                </div>
+            </div>
+            <div class="row">
+                <div class="columns">
+                    <h4><b>Plot Explanation:</b></h4>
+                        <p style="width: 620px; text-align: justify;">This grouped violin plot compares the audio features of each group's songs. The box plot inside the violin shows how the features of 
+                            both friends' songs are distributed, while the curve of the violin represents the probability of all songs in the genre taking on the associated feature value.
+                            In other words, if each group of friends picked a fourth song, there is a higher probability their fourth song will take on a value where the violin is widest,
+                            and a lower probability of their song having a value where the violin is the skinniest. These probabilities can be seen by hovering over the violin and 
+                            seeing how the <b>kernel density estimate (kde)</b> changes as you move along the violin.
+                        </p>
+                        <p style="width: 620px; text-align: justify;">Jackie, Fez, and Hyde's songs show variability in the danceability and energy violins. Their songs are not very danceable but have moderate energy.
+                            The tempo of their songs show some variability as well but are centered around moderate tempo values. Valence is the feature where Jackie, Fez, and Hyde's songs show the
+                            least variability. The valence of their songs is clustered around 0.6 and 0.7, which means their songs are moderately cheerful. Eric, Kelso, and Donna's songs also show
+                            variability in their danceability and energy. However, they are slightly more danceable and slightly less energetic than the other group's songs. The tempo of their songs
+                            are in the same range as Jackie, Fez, and Hyde's songs. The two groups show the most difference in the valence of their songs. Eric, Kelso, and Donna's songs are more 
+                            variable in their cheerfulness.
+                        </p>
+                        <p style="width: 620px; text-align: justify;">The shape of the violins for the recommended songs are tall, which implies variable audio features for the songs picked by Friendshipify. This makes 
+                            sense since each group's chosen songs also had variable audio features. The recommendations seem to be moderately danceable and have moderate energy. The tempo of the
+                            recommendations appears to be slightly more variable than the tempo of each group's songs. Valence of the recommendations seems to have been skewed by the variability of
+                            Eric, Kelso, and Donna's songs. The recommended songs also have lower valence, which means they sound less cheerful. This is an interesting result since Jackie, Fez,
+                            and Hyde's songs are very cheerful and centered around 0.70; Eric, Kelso, and Donna's songs are moderately cheerful, with a minimum value of 0.56. Despite
+                            these moderate to highly cheerful songs, the songs recommended have a minimum valence of 0.35 and a maximum valence of 0.67.
+                        </p>
+                </div>
+                <div class="columns">
+                        <p style="width: 620px; margin-top: 45px; text-align: justify;">Jackie's pick, "Call Me Maybe", and Eric's pick, "Electric Feel", seem to have had the biggest influence on the songs recommended 
+                            by Friendshipify. Both songs sound similar to "Post Malone", "Bad To You", and "Walls." Friendshipify recommending "Fortunate Son" was most likely a match on the energy of 
+                            Hyde's pick, "All The Small Things" and Donna's classic rock pick, "Hotel California." The songs "Blow Me" and "Pretty Peggy" seem to be odd selections compared to the other
+                            songs recommended. However, "Pretty Peggy" matches the mellowness of "Hotel California", and the loud energy of "Blow Me" is similar to "All The Small Things." Recommendations
+                            based on Kelso's pick, "Got To Give It Up", and Fez's pick, "Dancing Queen", seem to have been excluded. Some of the friends may enjoy the resulting playlist more than others.
+                            Since the songs provided all come from different genres, the resulting songs are also variable. 
+                        </p>
+                </div>
+            </div>
+        </div>
+
+    </main>
 </body>
 {% endblock %}

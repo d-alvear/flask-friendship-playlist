@@ -7,10 +7,10 @@
 {% block content %}
   <body>
     <h2 style="padding-left: 15px; margin-bottom: 0px;">Your Playlist</h2>
-    <div class="body-container">
-      <span class="inline-container">
+    <div style="margin: auto; width: 80%">
+      <span>
         <div class="row">
-          <div class="columns" style="margin-right: 75px; padding-top: 10px;">
+          <div class="columns" style="margin-right: 20px; padding-top: 10px;">
               {{ rec_table.to_html(index=False,classes="table table-bordered")|safe }}
           </div>
           <div class="columns" style="padding-top: 0px;">
@@ -35,7 +35,7 @@
           </div>
           <div class="columns" style="margin-left: 25px;">
               <h3><b>How To Interpret This Plot:</b></h3>
-                  <p style="width: 700px;">This grouped violin plot compares the audio features of of both friends songs. The box plot inside the violin shows how the features of 
+                  <p style="width: 620px; text-align: justify;">This grouped violin plot compares the audio features of of both friends songs. The box plot inside the violin shows how the features of 
                       both friends' songs are distributed, while the curve of the violin represents the probability of all songs in the genre taking on the associated feature value.
                       In other words, if each friend picked a fourth song, there is a higher probability the fourth song will take on a value where the violin is widest,
                       and a lower probability of their song having a value where the violin is the skinniest. These probabilities can be seen by hovering over the violin and 
