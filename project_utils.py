@@ -1,4 +1,5 @@
 from secret import *
+import re
 import pandas as pd
 import numpy as np
 import psycopg2 as pg
@@ -98,6 +99,9 @@ def get_mp3(track_dict):
 			pass 
 
 def librosa_pipeline(track_id):
+	'''Takes in a song's Spotify track id, locates its audio file, and runs
+	the audio file through the librosa feature extraction process. 
+	Returns the feature vector as a dict, with track id as the key'''
 	
 	path = f'/tmp/track_{track_id}.wav'
 
@@ -170,18 +174,8 @@ def sort_inputs(query):
 	
 	for track in query:
 		split_track = track.split(",")
-
-		if "'" in split_track:
-			new = split_track.replace("'","_")
-		elif "." in split_track:
-			new = split_track.replace(".","_")
-		elif "-" in split_track:
-			new = split_track.replace("-","_")
-		else:
-			new = split_track
-
-		name = new[0].strip()
-		artist = new[1].strip()
+		name = re.sub(r"[^a-zA-Z0-9_\s]+", "_", split_track[0].strip())
+		artist = re.sub(r"[^a-zA-Z0-9_\s]+", "_", split_track[1].strip())
 
 		q = f'''SELECT a.*, b.genre 
 			FROM norm_tracks a 
