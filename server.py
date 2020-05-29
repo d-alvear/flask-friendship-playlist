@@ -89,6 +89,8 @@ def friendship_app():
 	
 	query_a = request.form['query_a']
 	query_b = request.form['query_b']
+	print(query_a)
+	print(query_b)
 
 	# REWRITE THIS TO CHECK BOTH USERS' QUERIES
 	for q in [query_a, query_b]:
