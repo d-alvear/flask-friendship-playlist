@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+  <body>
+    <div class="body-container">
+    <header>
+      <h1 style="padding-bottom: 10px; text-align: center;">
+        Error
+      </h1>
+    </header>
+    <main>
+      <p>
+      </p>
+      <p style="font-size: 18; width: 600px;"></p>
+    </main>
+  </div>
+  </body>
+{% endblock %}
+
+{% block content %}
+  <body>
+    <div class="body-container">
+    <header>
+      <h1 style="padding-bottom: 10px; text-align: center;">
+        Error 500
+      </h1>
+    </header>
+    <main>
+      <p></p>
+      <p style="font-size: 20; width: 600px; text-align: justify;">There was an internal error. This usually happens if Friendshipify cannot
+        find one of the songs you typed in. Make sure your spelling is correct.</p>
+    </main>
+  </div>
+  </body>
+{% endblock %}

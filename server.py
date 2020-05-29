@@ -42,6 +42,11 @@ def authenticate_user():
 def homepage():
 	return render_template('index.html')
 
+
+@app.errorhandler(500)
+def internal_error(error):
+    return render_template('500.html'), 500
+
 @app.route('/about')
 def about():
 	return render_template('about.html')
@@ -146,7 +151,7 @@ def friendship_app():
 	#generate result plot
 	combined = format_dataframe(user_a_df,user_b_df,recommendations)
 	plot_div = generate_plot(combined)
-
+	print("finished!")
 	return render_template('results.html', 
 							user_a_table=user_a_df[['Track Name','Artist','Genre']],
 							user_b_table=user_b_df[['Track Name','Artist','Genre']],

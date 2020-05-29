@@ -255,10 +255,12 @@ def combine_all_features(metadata, librosa_features, spotify_features):
 				if row['track_id'] == k:
 					all_features.loc[i,'track_name'] = metadata[k][1]
 					all_features.loc[i,'artist'] = metadata[k][2]
-					if isinstance(metadata[k][4],list): 
+					if (isinstance(metadata[k][4],list)) and (len(metadata[k][4] > 0)): 
 						all_features.loc[i,'genre'] = metadata[k][4][0]
 					elif isinstance(metadata[k][4],str):
 						all_features.loc[i,'genre'] = metadata[k][4]
+					else:
+						all_features.loc[i,'genre'] = None
 
 		all_features = all_features[['track_id','track_name', 'artist', 'spectral_centroid', 'spectral_bandwidth', 'rolloff',
 									'zero_crossing_rate', 'mfcc1', 'mfcc2', 'mfcc3', 'mfcc4', 'mfcc5',
