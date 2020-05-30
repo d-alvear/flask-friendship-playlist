@@ -18,14 +18,10 @@ client_credentials_manager = SpotifyClientCredentials(client_id=spotify_credenti
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 #=============================== SQL Utils ====================================#
-# conn = pg.connect(database=sql_credentials['database'],
-# 				  user=sql_credentials['user'], 
-# 				  password=sql_credentials['password'],
-# 				  host=sql_credentials['host'])
-
-conn = pg.connect(database='spotify_db',
-					user='postgres',
-					password=)
+conn = pg.connect(database=sql_credentials['database'],
+				  user=sql_credentials['user'], 
+				  password=sql_credentials['password'],
+				  host=sql_credentials['host'])
 
 def run_query(q):
 	'''a function that takes a SQL query as an argument
@@ -97,7 +93,7 @@ def get_mp3(track_dict):
 	for track_id, properties in track_dict.items():
 		try:
 			doc = requests.get(properties[0])
-			with open(f'tmp/track_{track_id}.wav', 'wb') as f:
+			with open(f'/tmp/track_{track_id}.wav', 'wb') as f:
 				f.write(doc.content)
 		except:
 			pass 
@@ -107,7 +103,7 @@ def librosa_pipeline(track_id):
 	the audio file through the librosa feature extraction process. 
 	Returns the feature vector as a dict, with track id as the key'''
 	
-	path = f'tmp/track_{track_id}.wav'
+	path = f'/tmp/track_{track_id}.wav'
 
 	d = {}
 	d['track_id'] = track_id
