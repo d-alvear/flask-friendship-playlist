@@ -15,10 +15,14 @@ from plotly.offline import plot
 import plotly.graph_objs as go
 
 # connect to spotify_db
-conn = pg.connect(database=sql_credentials['database'],
-                  user=sql_credentials['user'], 
-                  password=sql_credentials['password'],
-                  host=sql_credentials['host'])
+# conn = pg.connect(database=sql_credentials['database'],
+#                   user=sql_credentials['user'], 
+#                   password=sql_credentials['password'],
+#                   host=sql_credentials['host'])
+
+conn = pg.connect(database='spotify_db',
+					user='postgres',
+					password=)
 
 
 # Authenticate with Spotify using the Client Credentials flow

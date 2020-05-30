@@ -18,10 +18,14 @@ client_credentials_manager = SpotifyClientCredentials(client_id=spotify_credenti
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 #=============================== SQL Utils ====================================#
-conn = pg.connect(database=sql_credentials['database'],
-				  user=sql_credentials['user'], 
-				  password=sql_credentials['password'],
-				  host=sql_credentials['host'])
+# conn = pg.connect(database=sql_credentials['database'],
+# 				  user=sql_credentials['user'], 
+# 				  password=sql_credentials['password'],
+# 				  host=sql_credentials['host'])
+
+conn = pg.connect(database='spotify_db',
+					user='postgres',
+					password=)
 
 def run_query(q):
 	'''a function that takes a SQL query as an argument
@@ -93,7 +97,7 @@ def get_mp3(track_dict):
 	for track_id, properties in track_dict.items():
 		try:
 			doc = requests.get(properties[0])
-			with open(f'/tmp/track_{track_id}.wav', 'wb') as f:
+			with open(f'tmp/track_{track_id}.wav', 'wb') as f:
 				f.write(doc.content)
 		except:
 			pass 
@@ -103,7 +107,7 @@ def librosa_pipeline(track_id):
 	the audio file through the librosa feature extraction process. 
 	Returns the feature vector as a dict, with track id as the key'''
 	
-	path = f'/tmp/track_{track_id}.wav'
+	path = f'tmp/track_{track_id}.wav'
 
 	d = {}
 	d['track_id'] = track_id
@@ -149,6 +153,28 @@ def get_missing_url(artist,song):
 		preview = content['results'][0]["previewUrl"]
 		genre = content['results'][0]["primaryGenreName"]
 		return str(preview), genre.lower()
+	
+	except:
+		pass
+
+def check_metadata(metadata):
+	for track_id, data in metadata.items():
+		if not data[4]:
+			new_genre = get_missing_genre(data[2])
+			data[4] = str(new_genre)
+
+	return metadata
+
+def get_missing_genre(artist):
+	'''falls back on the iTunes API to get an artists genre'''
+
+	artist = artist.replace(" ","+")
+	
+	try:
+		r = requests.get(f"https://itunes.apple.com/search?term={artist}&limit=1")
+		content = json.loads(r.text)
+		genre = content['results'][0]["primaryGenreName"]
+		return str(genre.lower())
 	
 	except:
 		pass
@@ -244,6 +270,7 @@ def get_spotify_features(metadata):
 		return None, None
 
 def combine_all_features(metadata, librosa_features, spotify_features):
+	print(metadata)
 	# concatenating the two dfs so the feature vector will be in the same format as the db
 	if (metadata != None) & (librosa_features != None) & (spotify_features != None):
 		all_features = pd.DataFrame(librosa_features).merge(pd.DataFrame(spotify_features),left_on='track_id',right_on='id')
@@ -255,7 +282,7 @@ def combine_all_features(metadata, librosa_features, spotify_features):
 				if row['track_id'] == k:
 					all_features.loc[i,'track_name'] = metadata[k][1]
 					all_features.loc[i,'artist'] = metadata[k][2]
-					if (isinstance(metadata[k][4],list)) and (len(metadata[k][4] > 0)): 
+					if (isinstance(metadata[k][4],list)) and (len(metadata[k][4]) > 0): 
 						all_features.loc[i,'genre'] = metadata[k][4][0]
 					elif isinstance(metadata[k][4],str):
 						all_features.loc[i,'genre'] = metadata[k][4]
@@ -511,6 +538,7 @@ def get_combined_recommendations(cosine_df):
 
 def not_in_database_pipeline(to_get,in_db):
 		metadata = gather_metadata(to_get)
+		metadata = check_metadata(metadata)
 		not_null, spotify_features = get_spotify_features(metadata)
 		
 		librosa_features = [librosa_pipeline(n) for n in not_null.keys()]

@@ -9,14 +9,20 @@
     document.getElementsByName('query_a')[0].value = prepopulatedValues[songCategories][0];
     document.getElementsByName('query_b')[0].value = prepopulatedValues[songCategories][1];
  
-    // var radioElements = document.getElementsByName("input3");
-
-    // for (var i=0; i<radioElements.length; i++) {
-    //   if (radioElements[i].getAttribute('value') == 'Radio3') {
-    //     radioElements[i].checked = true;
-    //   }
-    // }
+  
   }
+  function showDiv() {
+    document.getElementById('load').style.display = "block";
+ }
+
+ function on() {
+  document.getElementById("overlay").style.display = "block";
+}
+
+function off() {
+  document.getElementById("overlay").style.display = "none";
+}
+
 // </script>
 
   

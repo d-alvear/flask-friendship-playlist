@@ -10,14 +10,14 @@
     <div style="margin: auto; width: 80%">
       <span>
         <div class="row">
-          <div class="columns" style="margin-right: 20px; padding-top: 10px;">
+          <div class="columns" style="margin-right: 20px; padding-top: 10px; width: 450px;">
               {{ rec_table.to_html(index=False,classes="table table-bordered")|safe }}
           </div>
           <div class="columns" style="padding-top: 0px;">
               {{ div_placeholder }}
         </div>
         <div class="row">
-          <div class="columns" style="padding-left: 10px, width: 520px;">
+          <div class="columns" style="padding-left: 10px; width: 520px;">
             <h3 style="margin-bottom: 5px; width: 300px"><b>Plot Features:</b></h3>
             <p style="margin-bottom: 7px;">From the <a target="_blank" rel="noopener noreferrer" href="https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/">Spotify API Docs</a></p>
             <blockquote class="small-blockquote" style="width: 500px;">

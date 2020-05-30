@@ -1,13 +1,18 @@
 <!-- This is a static file -->
 <!-- served from your routes in server.js -->
+  
+<head><script type="text/javascript">
+	function showDiv() {
+	   document.getElementById('load').style.display = "block";
+	}
+</script></head>
 {% extends "base.html" %}
-
-
 {% block content %}
   <body>
+    <div id="overlay"></div>
     <div class="body-container">
     <header>
-      <h1 style="text-align:center">
+      <h1 style="text-align:center; margin-top: 15px; height: 50px;">
         Friendshipify
       </h1>
       <h4 style="text-align:center">
@@ -22,16 +27,17 @@
       <blockquote class="index_quote">Bohemian Rhapsody, Queen; Heartbreak Hotel, Elvis; Toxic, Britney Spears</blockquote></p>
       <p>using <b>semicolons between songs</b> and making sure your <b>spelling is correct</b>.</p>
       <p></p>
-        <form>
+        <form style="margin-bottom: 0px;">
            <label>Or Try a Demo: </label><br>
            <div style="display: inline-flex;">
-           <div style="padding-right: 10px;"><input type="radio" name="input3" value="popVsRock" onchange="autoFill(value)">Pop vs. Rock</div>
-           <div style="padding-right: 10px;"><input type="radio" name="input3" value="rockVsHiphop" onchange="autoFill(value)">Rock vs. Hip Hop</div>
-           <div style="padding-right: 10px;"><input type="radio" name="input3" value="mixedGenres" onchange="autoFill(value)">Mixed Genres<br></div>
+            <div style="padding-right: 10px;"><input type="radio" name="input3" value="popVsRock" onchange="autoFill(value)">Pop vs. Rock</div>
+            <div style="padding-right: 10px;"><input type="radio" name="input3" value="rockVsHiphop" onchange="autoFill(value)">Rock vs. Hip Hop</div>
+            <div style="padding-right: 10px;"><input type="radio" name="input3" value="mixedGenres" onchange="autoFill(value)">Mixed Genres<br></div>
            </div>
-        </form><br>
+        </form>
+        <p></p>
       
-        <form method="POST" action='results' >
+        <form method="POST" action='results'>
           <input name ="query_a" required type="text" maxlength="8000" placeholder="Friend 1" style="height: 30px; width: 600px;">
           <p></p>
           <form method="POST" action='results' >
@@ -39,9 +45,9 @@
           <p></p>
           <!-- <span class="input-group-btn"> -->
           <div style="text-align: center;">
-            <button class="btn" onclick="window.location.href='{{playlist}}'" type="submit">Submit</button>
+            <button class="btn" onclick="showDiv(); on(); window.location.href='{{playlist}}'" type="submit">Submit</button>
           </div>
-          </div>
+          <div id="load" style="display:none; margin-top: 5px;" class="loader"></div>
         </form>
     
     </main>
