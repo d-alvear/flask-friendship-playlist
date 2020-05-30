@@ -1,5 +1,4 @@
 # Friendshipify
-======================================================
 
 Friendshipify is a multi-user song recommender that generates a playlist based on the intersection of two users' music tastes.
 This app was built using Flask and deployed using the standard environment of Google Cloud's App Engine.
