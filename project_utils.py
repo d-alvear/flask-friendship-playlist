@@ -536,18 +536,18 @@ def get_combined_recommendations(cosine_df):
 	return final
 
 def not_in_database_pipeline(to_get,in_db):
-		metadata = gather_metadata(to_get)
-		metadata = check_metadata(metadata)
-		not_null, spotify_features = get_spotify_features(metadata)
-		
-		librosa_features = [librosa_pipeline(n) for n in not_null.keys()]
+	metadata = gather_metadata(to_get)
+	metadata = check_metadata(metadata)
+	not_null, spotify_features = get_spotify_features(metadata)
+	
+	librosa_features = [librosa_pipeline(n) for n in not_null.keys()]
 
-		user_df = combine_all_features(metadata,librosa_features,spotify_features)
-		user_df = generate_user_df(in_db,user_df)
+	user_df = combine_all_features(metadata,librosa_features,spotify_features)
+	user_df = generate_user_df(in_db,user_df)
 
-		user_df = remap_genres(user_df)
+	user_df = remap_genres(user_df)
 
-		return user_df
+	return user_df
 
 def format_dataframe(user_a_df,user_b_df,recommendations):
 	user_a_df.loc[:,'user'] = 'user a'

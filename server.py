@@ -116,11 +116,17 @@ def friendship_app():
 			user_b_df = user_b_in_db
 			print("Got It!")
 		elif (len(user_list[1]) > 0) and (user_list[0] == 0):
-			user_a_df = not_in_database_pipeline(user_list[1],user_a_in_db)
-			print("Need to Get")
+			try:
+				user_a_df = not_in_database_pipeline(user_list[1],user_a_in_db)
+				print("Need to Get")
+			except AttributeError:
+				return render_template('500.html')
 		elif (len(user_list[1]) > 0) and (user_list[0] == 1):
-			user_b_df = not_in_database_pipeline(user_list[1],user_b_in_db)
-			print("Need to Get")
+			try:
+				user_b_df = not_in_database_pipeline(user_list[1],user_b_in_db)
+				print("Need to Get")
+			except AttributeError:
+				return render_template('500.html')
 	
 	user_a_recs = [get_similar_track_ids(user_a_df, user_a_in_db)]
 	user_b_recs = [get_similar_track_ids(user_b_df, user_b_in_db)]
