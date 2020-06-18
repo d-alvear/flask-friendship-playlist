@@ -23,7 +23,7 @@ conn = pg.connect(database=sql_credentials['database'],
                   password=sql_credentials['password'],
                   host=sql_credentials['host'])
 
-def run_query(q):
+def run_query(q,conn):
 	'''a function that takes a SQL query as an argument
 	and returns a pandas dataframe of that query'''
 	with conn:
@@ -32,10 +32,24 @@ def run_query(q):
 			cur.execute(q)
 			return pd.read_sql(q, conn)
 
-		except (Exception, pg.DatabaseError) as error:
-			print(error)
-		finally:
-			pass
+		except (Exception, pg.Error) as e:
+			print(e)
+			try:
+				cur.close()
+				cur = conn.cursor()
+				cur.execute(q)
+				return pd.read_sql(q, conn)
+
+			except:
+				conn.close()
+				conn = pg.connect(database=sql_credentials['database'],
+								  user=sql_credentials['user'], 
+								  password=sql_credentials['password'],
+								  host=sql_credentials['host'])
+				cur = conn.cursor()
+				cur.execute(q)
+				return pd.read_sql(q, conn)
+	cur.close()
 #============================= Spotify Utils ==================================#
 def search_and_extract(track_query):
 	'''A function that takes in a song query and returns
@@ -207,7 +221,7 @@ def sort_inputs(query):
 			AND a.artist ILIKE '%{artist}%'
 			LIMIT 1
 			'''
-		r = run_query(q)
+		r = run_query(q,conn)
 		
 		if len(r) > 0:
 			user_df = user_df.append(r,ignore_index=True)
@@ -399,7 +413,7 @@ def get_similar_track_ids(user_df, user_in_db):
 		WHERE row_number < 10
 			AND b.genre IN ('pop','rock','rap','hip hop','indie')
 		ORDER BY b.genre;'''
-		all_tracks = run_query(q)
+		all_tracks = run_query(q,conn)
 		all_tracks.set_index('track_id',inplace=True)
 	
 	# list of genres where all genres are recognized
@@ -412,7 +426,7 @@ def get_similar_track_ids(user_df, user_in_db):
 		FROM norm_tracks a
 		JOIN track_metadata b ON a.track_id = b.track_id
 		WHERE b.genre IN {tuple(genres)};'''
-		genre_tracks = run_query(q)
+		genre_tracks = run_query(q,conn)
 		genre_tracks.set_index('track_id',inplace=True)
 
 	# if only one unique genre then get all the tracks that belong to it
@@ -422,7 +436,7 @@ def get_similar_track_ids(user_df, user_in_db):
 		FROM norm_tracks a
 		JOIN track_metadata b ON a.track_id = b.track_id
 		WHERE b.genre = '{genres[0]}';'''
-		genre_tracks = run_query(q)
+		genre_tracks = run_query(q,conn)
 		genre_tracks.set_index('track_id',inplace=True)
 	
 	# for tracks that aren't already in the database
@@ -459,7 +473,7 @@ def get_similar_track_ids(user_df, user_in_db):
 				WHERE track_id_1 IN {tuple(set_ids)}
 				AND row_num < 3
 				'''
-			tracks = run_query(q)
+			tracks = run_query(q,conn)
 			tracks = tracks.loc[:,'track_id_2']
 			recs.extend(list(tracks))
 		
@@ -473,7 +487,7 @@ def get_similar_track_ids(user_df, user_in_db):
 				WHERE track_id_1 = '{set_ids[0]}'
 				AND row_num < 3
 				'''
-			tracks = run_query(q)
+			tracks = run_query(q,conn)
 			tracks = tracks.loc[:,'track_id_2']
 			recs.extend(list(tracks))
 	return recs
@@ -489,7 +503,7 @@ def get_feature_vector_array(id_list):
 	q = f'''
 	SELECT * FROM norm_tracks
 	WHERE track_id IN {tuple(id_list)};'''
-	fv = run_query(q)
+	fv = run_query(q,conn)
 
 	fv = fv.set_index('track_id')
 	index = fv.index
@@ -532,7 +546,7 @@ def get_combined_recommendations(cosine_df):
 		JOIN track_metadata b 
 		ON a.track_id = b.track_id
 	WHERE a.track_id IN {tuple(ids)};'''
-	final = run_query(q)
+	final = run_query(q,conn)
 	return final
 
 def not_in_database_pipeline(to_get,in_db):
