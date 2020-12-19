@@ -9,3 +9,4 @@ test.py
 data.txt
 debug.log
 *.wav
+*.csv
