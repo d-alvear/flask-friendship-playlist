@@ -2,32 +2,37 @@ import psycopg2 as pg
 import pandas as pd 
 from secret import *
 
+# conn = pg.connect(database=sql_credentials['database'],
+#                   user=sql_credentials['user'], 
+#                   password=sql_credentials['password'])
 
 tracks = pd.read_csv('data/tracks.csv', sep=';', index_col=0)
 print(tracks.columns)
 
-# def run_query(q):
-#     with conn:
-#         try:
-#             cur = conn.cursor()
-#             cur.execute(q)
-#             return pd.read_sql(q, conn)
+print(tracks.head())
 
-#         except (Exception, pg.DatabaseError) as error:
-#             print(error)
+def run_query(q):
+    with conn:
+        try:
+            cur = conn.cursor()
+            cur.execute(q)
+            return pd.read_sql(q, conn)
 
-# def run_command(c):
-#     with conn:
-#         try:
-#             cur = conn.cursor()
-#             cur.execute(c)
-#             cur.close()
-#             conn.commit()
+        except (Exception, pg.DatabaseError) as error:
+            print(error)
+
+def run_command(c):
+    with conn:
+        try:
+            cur = conn.cursor()
+            cur.execute(c)
+            cur.close()
+            conn.commit()
             
-#         except (Exception, pg.DatabaseError) as error:
-#             print(error)
+        except (Exception, pg.DatabaseError) as error:
+            print(error)
 
-# cur = conn.cursor()
+cur = conn.cursor()
 
 # err = []
 # for i in range(len(tracks)):
