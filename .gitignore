@@ -1,6 +1,5 @@
 *.env
 secret.py
-*.ipynb
 *.sql
 *.pkl
 runtimes.txt
@@ -10,3 +9,6 @@ data.txt
 debug.log
 *.wav
 *.csv
+env/
+.vscode/
+__pycache__/
